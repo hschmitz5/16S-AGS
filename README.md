@@ -1,5 +1,7 @@
 16S rRNA Sequencing of Aerobic Granular Sludge, grouped by size.
 
+Raw paired-end reads are available through the NCBI SRA, accession PRJNA1367764.
+
 ### 1.) Generate phyloseq object
 
 Use define_ps.R 
