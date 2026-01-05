@@ -43,7 +43,7 @@ process_lfc <- function(df, taxa) {
       XL  = ifelse(q_size.nameXL  < p_threshold & passed_ss_size.nameXL,  lfc_size.nameXL, 0),
       XXL = ifelse(q_size.nameXXL < p_threshold & passed_ss_size.nameXXL, lfc_size.nameXXL, 0)
     ) %>%
-    dplyr::select(OTU, M, L, XL, XXL) %>%
+    dplyr::select(Species, M, L, XL, XXL) %>% # Genus - name_numbered
     mutate(
       mean_lfc = rowMeans(across(M:XXL, abs), na.rm = TRUE)
     ) %>%
@@ -60,17 +60,33 @@ res_prim = output$res %>%
   rename(OTU = taxon) %>%
   left_join(taxonomy, by = "OTU") %>%
   group_by(Genus) %>%
-  #arrange(desc(number), .by_group = TRUE) %>%  sort by high_ab_OTUs
+  head(20) 
+
+%>%
   mutate(
-    name_numbered = if (n() == 1) {
-      Genus
-    } else {
-      paste0(Genus, "-", row_number())
-    }
+    Species_updated = case_when(
+      !is.na(Species) ~ Species,
+      !is.na(Genus)   ~ paste0(Genus, "_sp"),
+      !is.na(Family)  ~ paste0(Family, "_sp"),
+      TRUE            ~ NA_character_
+    )
+    #Species_updated = if_else(is.na(Species) | (startsWith(Species, "midas")), Genus, Species)
   ) %>%
   ungroup()
 
-
+# res_prim = output$res %>% 
+#   rename(OTU = taxon) %>%
+#   left_join(taxonomy, by = "OTU") %>%
+#   group_by(Genus) %>%
+#   #arrange(desc(number), .by_group = TRUE) %>%  sort by high_ab_OTUs
+#   mutate(
+#     name_numbered = if (n() == 1) {
+#       Genus
+#     } else {
+#       paste0(Genus, "-", row_number())
+#     }
+#   ) %>%
+#   ungroup()
 
 # all_sig_taxa <- taxonomy %>%
 #   filter(OTU %in% all_sig_ASV) %>%
@@ -87,13 +103,13 @@ lfc_low  <- process_lfc(res_prim, low_DA_taxa)
 ### For plotting
 fig_high <- lfc_high %>%
   dplyr::select(-mean_lfc) %>%
-  tibble::column_to_rownames("OTU") %>%
+  tibble::column_to_rownames("Species") %>%
   as.matrix()
 
 fig_low <- lfc_low %>%
   head(n_display_low) %>%
   dplyr::select(-mean_lfc) %>%
-  tibble::column_to_rownames("OTU") %>%
+  tibble::column_to_rownames("Species") %>%
   as.matrix()
 
 # ---- Plotting
