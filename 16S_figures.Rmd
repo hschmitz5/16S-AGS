@@ -4,7 +4,7 @@ author: "Hannah Schmitz"
 date: "`r Sys.Date()`"
 output: 
   powerpoint_presentation:
-    reference_doc: null  # optional, use a custom template if desired
+    reference_doc: "Documents/4 Traditional White with Purple.pptx"  # optional, use a custom template if desired
 ---
 
 # Ordination
