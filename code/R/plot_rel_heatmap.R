@@ -23,7 +23,7 @@ DA_taxa <- high_ab_genera[high_ab_genera %in% all_taxa_ancom]
 
 # -------- Define groups ---------
 
-metadata <- data.frame(ps_ASV@sam_data) %>% .[sam_name, ] # reorder
+metadata <- data.frame(ps@sam_data) %>% .[sam_name, ] # reorder
 
 # Define colors for size categories directly from metadata
 size_colors <- setNames(met.brewer(size_pal, n_sizes), size$name)
@@ -63,7 +63,7 @@ make_rel_heatmap <- function(df, annot = NULL, legend_name = "Rel Ab [%]") {
   )
 }
 
-rel_wide <- get_rel_genus(ps_ASV) %>%
+rel_wide <- get_rel_genus(ps) %>%
   filter(Genus %in% high_ab_genera) %>%
   dplyr::select(Genus, Sample, Abundance) %>%  
   pivot_wider(
