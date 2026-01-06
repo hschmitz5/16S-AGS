@@ -56,21 +56,19 @@ taxonomy <- get_taxonomy(ps)
 
 output <- readRDS(ancom_fname)
 
-res_prim = output$res %>% 
+res_prim3 = output$res %>% 
   rename(OTU = taxon) %>%
   left_join(taxonomy, by = "OTU") %>%
   group_by(Genus) %>%
-  head(20) 
-
-%>%
+  head(20) %>%
   mutate(
     Species_updated = case_when(
-      !is.na(Species) ~ Species,
-      !is.na(Genus)   ~ paste0(Genus, "_sp"),
-      !is.na(Family)  ~ paste0(Family, "_sp"),
-      TRUE            ~ NA_character_
+      !is.na(Species) & !startsWith(Species, "midas") ~ Species,
+      !is.na(Genus)   & !startsWith(Genus, "midas")   ~ paste0(Genus, "_g_sp"),
+      !is.na(Family)  & !startsWith(Family, "midas")  ~ paste0(Family, "_f_sp"),
+      !is.na(Order)   & !startsWith(Order, "midas")   ~ paste0(Order, "_o_sp"),
+      !is.na(Class)   & !startsWith(Class, "midas")   ~ paste0(Class, "_c_sp")
     )
-    #Species_updated = if_else(is.na(Species) | (startsWith(Species, "midas")), Genus, Species)
   ) %>%
   ungroup()
 
