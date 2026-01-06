@@ -56,35 +56,28 @@ taxonomy <- get_taxonomy(ps)
 
 output <- readRDS(ancom_fname)
 
-res_prim3 = output$res %>% 
+res_prim = output$res %>% 
   rename(OTU = taxon) %>%
   left_join(taxonomy, by = "OTU") %>%
-  group_by(Genus) %>%
-  head(20) %>%
   mutate(
     Species_updated = case_when(
       !is.na(Species) & !startsWith(Species, "midas") ~ Species,
-      !is.na(Genus)   & !startsWith(Genus, "midas")   ~ paste0(Genus, "_g_sp"),
-      !is.na(Family)  & !startsWith(Family, "midas")  ~ paste0(Family, "_f_sp"),
-      !is.na(Order)   & !startsWith(Order, "midas")   ~ paste0(Order, "_o_sp"),
-      !is.na(Class)   & !startsWith(Class, "midas")   ~ paste0(Class, "_c_sp")
+      !is.na(Genus)   & !startsWith(Genus, "midas")   ~ paste0(Genus, "_sp_g"),
+      !is.na(Family)  & !startsWith(Family, "midas")  ~ paste0(Family, "_sp_f"),
+      !is.na(Order)   & !startsWith(Order, "midas")   ~ paste0(Order, "_sp_o"),
+      !is.na(Class)   & !startsWith(Class, "midas")   ~ paste0(Class, "_sp_c")
     )
+  ) %>%
+  group_by(Species_updated) %>%
+  mutate(
+    name_numbered = if (n() == 1) {
+      Species_updated
+    } else {
+      paste0(Species_updated, "-", row_number())
+    }
   ) %>%
   ungroup()
 
-# res_prim = output$res %>% 
-#   rename(OTU = taxon) %>%
-#   left_join(taxonomy, by = "OTU") %>%
-#   group_by(Genus) %>%
-#   #arrange(desc(number), .by_group = TRUE) %>%  sort by high_ab_OTUs
-#   mutate(
-#     name_numbered = if (n() == 1) {
-#       Genus
-#     } else {
-#       paste0(Genus, "-", row_number())
-#     }
-#   ) %>%
-#   ungroup()
 
 # all_sig_taxa <- taxonomy %>%
 #   filter(OTU %in% all_sig_ASV) %>%
