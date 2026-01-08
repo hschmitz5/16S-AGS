@@ -2,8 +2,13 @@ get_ancom_taxa <- function(fname_in, ps, p_threshold, rel_ab_cutoff, write2excel
   
   output <- readRDS(fname_in)
   
+  taxonomy <- get_taxonomy(ps)
+  
   # Subset based on significance
   all_sig_taxa <- output$res %>%
+    rename(OTU = taxon) %>%
+    left_join(taxonomy, join_by(OTU)) %>%
+    filter(!is.na(Phylum)) %>%
     # Combines diff_size* and passed_ss* together
     pivot_longer(
       cols = matches("q_size\\.name|passed_ss_size\\.name"),
@@ -11,15 +16,12 @@ get_ancom_taxa <- function(fname_in, ps, p_threshold, rel_ab_cutoff, write2excel
       names_pattern = "(q|passed_ss)_size\\.name(.*)"
     ) %>%
     filter(q < p_threshold & passed_ss == TRUE) %>%   
-    distinct(taxon) %>%
-    pull(taxon)
+    distinct(OTU) %>%
+    pull(OTU)
   
   # Rename ASVs based on taxonomy
-  sig_taxa_tbl <- get_taxonomy(ps) %>%
-    filter(
-      !is.na(Phylum),
-      OTU %in% all_sig_taxa
-    ) %>%
+  sig_taxa_tbl <- taxonomy %>%
+    filter(OTU %in% all_sig_taxa) %>%
     mutate(
       Species_tmp = case_when(
         !is.na(Species) & !startsWith(Species, "midas") ~ Species,
@@ -28,7 +30,7 @@ get_ancom_taxa <- function(fname_in, ps, p_threshold, rel_ab_cutoff, write2excel
         !is.na(Order)   & !startsWith(Order, "midas")   ~ paste0(Order, "_sp_o"),
         !is.na(Class)   & !startsWith(Class, "midas")   ~ paste0(Class, "_sp_c"),
         !is.na(Phylum)  & !startsWith(Phylum, "midas")  ~ paste0(Phylum, "_sp_p"),
-        .default = Species
+        .default = Species 
       )
     ) %>%
     group_by(Species_tmp) %>%
