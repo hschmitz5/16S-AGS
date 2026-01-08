@@ -1,4 +1,4 @@
-get_ancom_taxa <- function(fname_in, ps, p_threshold, rel_ab_cutoff, write2excel = FALSE, fname_out = NULL) {
+get_ancom_taxa <- function(fname_in, ps, p_threshold, rel_ab_cutoff, write2excel, fname_out) {
   
   output <- readRDS(fname_in)
   
@@ -50,21 +50,18 @@ get_ancom_taxa <- function(fname_in, ps, p_threshold, rel_ab_cutoff, write2excel
   
     
   # --- Write Data to Excel
-  # if (isTRUE(write2excel)) {
-  #   # names of significant taxa
-  #   high_DA_taxa <- high_ab_OTUs[high_ab_OTUs %in% all_sig_taxa]
-  #   low_DA_taxa <- all_sig_taxa[!all_sig_taxa %in% high_DA_taxa]
-  #   
-  #   # Make a single data frame with two columns
-  #   taxa_df <- data.frame(
-  #     high_abundance = c(sort(high_DA_taxa), rep(NA, length(low_DA_taxa) - length(high_DA_taxa))),
-  #     low_abundance  = sort(low_DA_taxa)
-  #   )
-  #   # Write to Excel
-  #   write_xlsx(taxa_df, path = fname_out)
-  # } 
+  if (isTRUE(write2excel)) {
+    # Make a single data frame with two columns
+    taxa_df <- data.frame(
+      high_abundance = c(sort(high_ab_taxa), rep(NA, length(low_ab_taxa) - length(high_ab_taxa))),
+      low_abundance  = sort(low_ab_taxa)
+    )
+    # Write to Excel
+    write_xlsx(taxa_df, path = fname_out)
+  } 
   
   return(list(
+    name_tbl = sig_taxa_tbl,
     high_ab = high_ab_taxa,
     low_ab  = low_ab_taxa
   ))
