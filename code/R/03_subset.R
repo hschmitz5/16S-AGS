@@ -10,20 +10,25 @@ get_ancom_taxa <- function(fname_in, ps, p_threshold, rel_ab_cutoff, write2excel
       names_to = c(".value","size"),
       names_pattern = "(q|passed_ss)_size\\.name(.*)"
     ) %>%
-    filter(q < p_threshold & passed_ss == TRUE & !is.na(taxon)) %>%   
+    filter(q < p_threshold & passed_ss == TRUE) %>%   
     distinct(taxon) %>%
     pull(taxon)
   
   # Rename ASVs based on taxonomy
   sig_taxa_tbl <- get_taxonomy(ps) %>%
-    filter(OTU %in% all_sig_taxa) %>%
+    filter(
+      !is.na(Phylum),
+      OTU %in% all_sig_taxa
+    ) %>%
     mutate(
       Species_tmp = case_when(
         !is.na(Species) & !startsWith(Species, "midas") ~ Species,
         !is.na(Genus)   & !startsWith(Genus, "midas")   ~ paste0(Genus, "_sp_g"),
         !is.na(Family)  & !startsWith(Family, "midas")  ~ paste0(Family, "_sp_f"),
         !is.na(Order)   & !startsWith(Order, "midas")   ~ paste0(Order, "_sp_o"),
-        !is.na(Class)   & !startsWith(Class, "midas")   ~ paste0(Class, "_sp_c")
+        !is.na(Class)   & !startsWith(Class, "midas")   ~ paste0(Class, "_sp_c"),
+        !is.na(Phylum)  & !startsWith(Phylum, "midas")  ~ paste0(Phylum, "_sp_p"),
+        .default = Species
       )
     ) %>%
     group_by(Species_tmp) %>%
