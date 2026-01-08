@@ -9,8 +9,8 @@ taxa_pal <- "Hiroshige"
 
 # File Names
 ps_fname    <- "./data/ps_ASV_subset.rds"
-ancom_fname <- "./data/ancombc2_genus.rds"
-aldex_fname <- "./data/aldex_t.rds"
+ancom_fname <- "./data/ancombc2_ASV.rds"
+aldex_fname <- "./data/aldex_ASV.rds"
 mech_fname  <- "./data/EPS_moduli.xlsx"
 
 # absolute counts
