@@ -9,7 +9,6 @@ library(ComplexHeatmap)
 write2excel <- FALSE
 n_display_low <- 30
 
-ancom_fname <- "./data/ancombc2_ASV.rds"
 fname_excel <- "./data/ANCOM_ASV.xlsx"
 
 fname_high  <- "./figures/DA_ancom_high.png"
