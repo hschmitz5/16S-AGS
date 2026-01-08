@@ -2,7 +2,6 @@ source("./code/R/00_setup.R")
 source("./code/R/01_load_data.R")
 source("./code/R/02_process_ps.R")
 source("./code/R/03_subset.R")
-source("./code/R/04_subset_DA.R")
 library(writexl)
 library(ComplexHeatmap)
 
@@ -22,44 +21,53 @@ cell_w <- 0.6 # same as cell_h
 row_fontsize <- 10
 col_fontsize <- 11
 
-all_sig_taxa <- get_aldex_taxa(aldex_fname, p_threshold, effect_threshold, high_ab_genera, write2excel, fname_excel)
-high_DA_taxa <- high_ab_genera[high_ab_genera %in% all_sig_taxa]
-low_DA_taxa <- all_sig_taxa[!all_sig_taxa %in% high_DA_taxa]
+sig_taxa <- get_aldex_taxa(aldex_fname, ps, p_threshold, effect_threshold, rel_ab_cutoff, write2excel, fname_out)
+
+# Read in ALDEx data
+output <- readRDS(aldex_fname) 
+output$res <- map(output$res, ~ .x %>% 
+                    rownames_to_column("OTU") %>%
+                    left_join(sig_taxa$name_tbl, join_by(OTU))
+                  ) 
 
 process_clr <- function(df, taxa, p_threshold, effect_threshold) {
-  # Combine into wide format
   map2(df$res, df$comparison, ~ .x %>%
-         filter(Genus %in% taxa) %>%
+         filter(Species_updated %in% taxa) %>%
          mutate(
-           effect_update = ifelse(wi.eBH < p_threshold & abs(effect) > effect_threshold, effect, 0)
+           effect_update = if_else(
+             wi.eBH < p_threshold & abs(effect) > effect_threshold,
+             effect,
+             0
+           )
          ) %>%
-         dplyr::select(Genus, effect_update) %>%
-         rename(!! as.character(.y) := effect_update) 
+         group_by(Species_updated) %>%
+         summarise(
+           !!as.character(.y) := mean(effect_update, na.rm = TRUE),
+           .groups = "drop"
+         )
   ) %>%
-    reduce(full_join, by = "Genus") %>%
+    reduce(full_join, by = "Species_updated") %>%
     mutate(
       mean_effect = rowMeans(across(all_of(df$comparison), abs), na.rm = TRUE)
     ) %>%
     arrange(desc(mean_effect))
 }
 
-output <- readRDS(aldex_fname) 
-output$res <- map(output$res, ~ .x %>% rownames_to_column("Genus")) 
 
 # Apply function to high and low abundance taxa
-effect_high <- process_clr(output, high_DA_taxa, p_threshold, effect_threshold)
-effect_low  <- process_clr(output, low_DA_taxa, p_threshold, effect_threshold)
+effect_high <- process_clr(output, sig_taxa$high_ab, p_threshold, effect_threshold)
+effect_low  <- process_clr(output, sig_taxa$low_ab, p_threshold, effect_threshold)
 
 ### For plotting
 fig_high <- effect_high %>%
   dplyr::select(-mean_effect) %>%
-  tibble::column_to_rownames("Genus") %>%
+  tibble::column_to_rownames("Species_updated") %>%
   as.matrix()
 
 fig_low <- effect_low %>%
   head(n_display_low) %>%
   dplyr::select(-mean_effect) %>%
-  tibble::column_to_rownames("Genus") %>%
+  tibble::column_to_rownames("Species_updated") %>%
   as.matrix()
 
 # ---- Plotting
