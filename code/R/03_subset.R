@@ -42,7 +42,7 @@ get_ancom_taxa <- function(fname_in, ps, p_threshold, rel_ab_cutoff, write2excel
       }
     ) %>%
     ungroup() %>%
-    select(OTU, Species_updated) 
+    select(-Species_tmp)
   
   # ----- Subset abundance ------
   # At least one sample has Abundance > rel_ab_cutoff
