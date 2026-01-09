@@ -5,8 +5,7 @@ source("./code/R/00_setup.R")
 source("./code/R/01_load_data.R")
 source("./code/R/02_process_ps.R")
 source("./code/R/03_subset.R")
-source("./code/R/04_subset_DA.R")
-source("./code/R/05_bias_correct.R")
+source("./code/R/04_bias_correct.R")
 
 fname_out <- "./figures/BC_comparison.png"
   
