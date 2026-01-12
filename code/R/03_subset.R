@@ -32,6 +32,12 @@ get_ancom_taxa <- function(fname_in, ps, p_threshold, rel_ab_cutoff, write2excel
     
   # --- Write Data to Excel
   if (isTRUE(write2excel)) {
+    if (is.null(fname_out)) {
+      # Generate a default filename if not provided
+      fname_out <- "./data/ANCOM.xlsx"
+      message("No fname_out provided. Writing Excel file to default: ", fname_out)
+    }
+    
     # Make a single data frame with two columns
     taxa_df <- data.frame(
       high_abundance = c(sort(high_ab_taxa), rep(NA, length(low_ab_taxa) - length(high_ab_taxa))),
@@ -40,6 +46,7 @@ get_ancom_taxa <- function(fname_in, ps, p_threshold, rel_ab_cutoff, write2excel
     # Write to Excel
     write_xlsx(taxa_df, path = fname_out)
   } 
+  
   return(list(
     high_ab = high_ab_taxa,
     low_ab  = low_ab_taxa
@@ -76,9 +83,14 @@ get_aldex_taxa <- function(fname_in, ps, p_threshold, effect_threshold, rel_ab_c
   
   low_ab_taxa <- setdiff(all_sig_taxa, high_ab_taxa)
   
-  
   # --- Write Data to Excel
   if (isTRUE(write2excel)) {
+    if (is.null(fname_out)) {
+      # Generate a default filename if not provided
+      fname_out <- "./data/ALDEx.xlsx"
+      message("No fname_out provided. Writing Excel file to default: ", fname_out)
+    }
+    
     # Make a single data frame with two columns
     taxa_df <- data.frame(
       high_abundance = c(sort(high_ab_taxa), rep(NA, length(low_ab_taxa) - length(high_ab_taxa))),
@@ -87,13 +99,14 @@ get_aldex_taxa <- function(fname_in, ps, p_threshold, effect_threshold, rel_ab_c
     # Write to Excel
     write_xlsx(taxa_df, path = fname_out)
   }
+  
   return(list(
     high_ab = high_ab_taxa,
     low_ab  = low_ab_taxa
   ))
 }
 
-get_common_taxa <- function(ancom_fname, aldex_fname, p_threshold, effect_threshold, high_ab_OTUs) {
+get_common_taxa <- function(ancom_fname, aldex_fname, p_threshold, effect_threshold) {
   # names of significant taxa
   all_taxa_ancom <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel, fname_out) 
   high_ancom <- all_taxa_ancom$high_ab
