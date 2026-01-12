@@ -3,11 +3,12 @@ rm(list = ls())
 
 library(qiime2R)
 library(phyloseq)
+library(tidyverse)
 
 # define sample names
 size <- data.frame(
   ranges = c("0.43-0.85","0.85-1.4", "1.4-2", "2-2.8", "2.8-4", ">4"),
-  name = c("XS", "S", "M", "L", "XL", "XXL")
+  name = c("floccular", "S", "M", "L", "XL", "XXL")
 )
 
 # Import QIIME2 data as phyloseq object
@@ -34,6 +35,37 @@ rarefy_level <- min(sample_sums(ps_filt0))  # lowest number of ASVs per sample
 ps_filt <-rarefy_even_depth(
   ps_filt0, rarefy_level, rngseed = 7, replace = TRUE, trimOTUs = TRUE, verbose = TRUE
 )
+
+# Generate new names for OTUs
+taxonomy <- as.data.frame(as.matrix(ps_filt@tax_table)) %>%
+  rownames_to_column("OTU") %>%
+  mutate(
+    Species_tmp = case_when(
+      is.na(Phylum) ~ paste0("Phylum_unknown"),
+      !is.na(Species) & !startsWith(Species, "midas") ~ Species,
+      !is.na(Genus)   & !startsWith(Genus, "midas")   ~ paste0(Genus, "_sp_g"),
+      !is.na(Family)  & !startsWith(Family, "midas")  ~ paste0(Family, "_sp_f"),
+      !is.na(Order)   & !startsWith(Order, "midas")   ~ paste0(Order, "_sp_o"),
+      !is.na(Class)   & !startsWith(Class, "midas")   ~ paste0(Class, "_sp_c"),
+      !is.na(Phylum)  & !startsWith(Phylum, "midas")  ~ paste0(Phylum, "_sp_p"),
+      .default = Species 
+    )
+  ) %>%
+  group_by(Species_tmp) %>%
+  mutate(
+    Species_updated = if (n() == 1) {
+      Species_tmp
+    } else {
+      paste0(Species_tmp, "-", row_number())
+    }
+  ) %>%
+  ungroup() %>%
+  select(-Species_tmp)
+
+# Apply names to ps
+rownames(ps_filt@otu_table) <- taxonomy$Species_updated
+rownames(ps_filt@tax_table) <- taxonomy$Species_updated
+ps_filt@phy_tree$tip.label <- taxonomy$Species_updated
 
 saveRDS(ps_filt, file = "./data/ps_ASV_full.rds")
 
