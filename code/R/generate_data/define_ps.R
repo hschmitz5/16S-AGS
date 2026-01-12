@@ -43,11 +43,11 @@ taxonomy <- as.data.frame(as.matrix(ps_filt@tax_table)) %>%
     Species_tmp = case_when(
       is.na(Phylum) ~ paste0("Phylum_unknown"),
       !is.na(Species) & !startsWith(Species, "midas") ~ Species,
-      !is.na(Genus)   & !startsWith(Genus, "midas")   ~ paste0(Genus, "_sp_g"),
-      !is.na(Family)  & !startsWith(Family, "midas")  ~ paste0(Family, "_sp_f"),
-      !is.na(Order)   & !startsWith(Order, "midas")   ~ paste0(Order, "_sp_o"),
-      !is.na(Class)   & !startsWith(Class, "midas")   ~ paste0(Class, "_sp_c"),
-      !is.na(Phylum)  & !startsWith(Phylum, "midas")  ~ paste0(Phylum, "_sp_p"),
+      !is.na(Genus)   & !startsWith(Genus, "midas")   ~ paste0(Genus, "_g"),
+      !is.na(Family)  & !startsWith(Family, "midas")  ~ paste0(Family, "_f"),
+      !is.na(Order)   & !startsWith(Order, "midas")   ~ paste0(Order, "_o"),
+      !is.na(Class)   & !startsWith(Class, "midas")   ~ paste0(Class, "_c"),
+      !is.na(Phylum)  & !startsWith(Phylum, "midas")  ~ paste0(Phylum, "_p"),
       .default = Species 
     )
   ) %>%
@@ -60,13 +60,14 @@ taxonomy <- as.data.frame(as.matrix(ps_filt@tax_table)) %>%
     }
   ) %>%
   ungroup() %>%
-  select(-Species_tmp)
+  dplyr::select(-Species_tmp)
 
 # Apply names to ps
 rownames(ps_filt@otu_table) <- taxonomy$Species_updated
 rownames(ps_filt@tax_table) <- taxonomy$Species_updated
 ps_filt@phy_tree$tip.label <- taxonomy$Species_updated
 
+# Save
 saveRDS(ps_filt, file = "./data/ps_ASV_full.rds")
 
 # remove XS granules
