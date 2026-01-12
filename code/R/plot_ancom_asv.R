@@ -28,13 +28,12 @@ sig_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2ex
 # Read in data and add new names
 output <- readRDS(ancom_fname)
 res_prim <- output$res %>% 
-  rename(OTU = taxon) %>%
-  left_join(sig_taxa$name_tbl, join_by(OTU)) 
+  rename(OTU = taxon) 
 
 # Define matrix of log-fold change data per size
 process_lfc <- function(df, taxa) {
   df %>%
-    filter(Species_updated %in% taxa) %>%
+    filter(OTU %in% taxa) %>%
     # change value to zero if not significant
     mutate(
       M   = ifelse(q_size.nameM   < p_threshold & passed_ss_size.nameM,   lfc_size.nameM, 0),
@@ -42,7 +41,7 @@ process_lfc <- function(df, taxa) {
       XL  = ifelse(q_size.nameXL  < p_threshold & passed_ss_size.nameXL,  lfc_size.nameXL, 0),
       XXL = ifelse(q_size.nameXXL < p_threshold & passed_ss_size.nameXXL, lfc_size.nameXXL, 0)
     ) %>%
-    dplyr::select(Species_updated, M, L, XL, XXL) %>% # Species - new name
+    dplyr::select(OTU, M, L, XL, XXL) %>% # Species - new name
     mutate(
       mean_lfc = rowMeans(across(M:XXL, abs), na.rm = TRUE)
     ) %>%
@@ -57,13 +56,13 @@ lfc_low  <- process_lfc(res_prim, sig_taxa$low_ab)
 ### For plotting
 fig_high <- lfc_high %>%
   dplyr::select(-mean_lfc) %>%
-  tibble::column_to_rownames("Species_updated") %>%
+  tibble::column_to_rownames("OTU") %>%
   as.matrix()
 
 fig_low <- lfc_low %>%
   head(n_display_low) %>%
   dplyr::select(-mean_lfc) %>%
-  tibble::column_to_rownames("Species_updated") %>%
+  tibble::column_to_rownames("OTU") %>%
   as.matrix()
 
 # ---- Plotting
