@@ -26,13 +26,12 @@ sig_taxa <- get_aldex_taxa(aldex_fname, ps, p_threshold, effect_threshold, rel_a
 # Read in ALDEx data
 output <- readRDS(aldex_fname) 
 output$res <- map(output$res, ~ .x %>% 
-                    rownames_to_column("OTU") %>%
-                    left_join(sig_taxa$name_tbl, join_by(OTU))
+                    rownames_to_column("OTU") 
                   ) 
 
 process_clr <- function(df, taxa, p_threshold, effect_threshold) {
   map2(df$res, df$comparison, ~ .x %>%
-         filter(Species_updated %in% taxa) %>%
+         filter(OTU %in% taxa) %>%
          mutate(
            effect_update = if_else(
              wi.eBH < p_threshold & abs(effect) > effect_threshold,
@@ -40,13 +39,13 @@ process_clr <- function(df, taxa, p_threshold, effect_threshold) {
              0
            )
          ) %>%
-         group_by(Species_updated) %>%
+         group_by(OTU) %>%
          summarise(
            !!as.character(.y) := mean(effect_update, na.rm = TRUE),
            .groups = "drop"
          )
   ) %>%
-    reduce(full_join, by = "Species_updated") %>%
+    reduce(full_join, by = "OTU") %>%
     mutate(
       mean_effect = rowMeans(across(all_of(df$comparison), abs), na.rm = TRUE)
     ) %>%
@@ -61,13 +60,13 @@ effect_low  <- process_clr(output, sig_taxa$low_ab, p_threshold, effect_threshol
 ### For plotting
 fig_high <- effect_high %>%
   dplyr::select(-mean_effect) %>%
-  tibble::column_to_rownames("Species_updated") %>%
+  tibble::column_to_rownames("OTU") %>%
   as.matrix()
 
 fig_low <- effect_low %>%
   head(n_display_low) %>%
   dplyr::select(-mean_effect) %>%
-  tibble::column_to_rownames("Species_updated") %>%
+  tibble::column_to_rownames("OTU") %>%
   as.matrix()
 
 # ---- Plotting
@@ -114,7 +113,7 @@ rowname_width_in <- convertWidth(
 ht_low  <- create_heatmap(fig_low, rowname_width_in, paste0(n_display_low, " largest effect"))
 
 # Save images
-common_width <- n_cols * cell_w + rowname_width_in + 2 # in
+common_width <- ncol(fig_high) * cell_w + rowname_width_in + 2 # in
 png(fname_high, 
     width = common_width,
     height = nrow(fig_high) * cell_h + 1,
