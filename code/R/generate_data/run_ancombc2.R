@@ -3,9 +3,9 @@ rm(list = ls())
 library(phyloseq)
 library(ANCOMBC)
 
-fname_out <- "../results/ancombc2_ASV.rds"
+fname_out <- "./data/ancombc2_ASV.rds"
 
-ps_ASV <- readRDS("../data/ps_ASV_subset.rds") 
+ps_ASV <- readRDS("./data/ps_ASV_subset.rds") 
 
 # Remove taxa not seen more than 3 times (reads) in at least 20% of the samples.
 # This protects against an OTU with small mean & trivially large C.V.
@@ -26,11 +26,11 @@ output <- ancombc2(
   fix_formula = "size.name",    
   group = "size.name",
   struc_zero = TRUE,
-  global = TRUE, pairwise = TRUE, dunnet = TRUE, trend = TRUE,  
-  trend_control = list(contrast = contrast_mats,
-                       node = list(4, 4),
-                       solver = "ECOS",
-                       B = 100)
+  global = TRUE, pairwise = TRUE, dunnet = TRUE, trend = FALSE #, #TRUE,  
+  # trend_control = list(contrast = contrast_mats,
+  #                      node = list(4, 4),
+  #                      solver = "ECOS",
+  #                      B = 100)
 )
 
 saveRDS(output, file = fname_out)
