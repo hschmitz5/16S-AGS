@@ -19,41 +19,15 @@ get_ancom_taxa <- function(fname_in, ps, p_threshold, rel_ab_cutoff, write2excel
     distinct(OTU) %>%
     pull(OTU)
   
-  # Rename ASVs based on taxonomy
-  sig_taxa_tbl <- taxonomy %>%
-    filter(OTU %in% all_sig_taxa) %>%
-    mutate(
-      Species_tmp = case_when(
-        !is.na(Species) & !startsWith(Species, "midas") ~ Species,
-        !is.na(Genus)   & !startsWith(Genus, "midas")   ~ paste0(Genus, "_sp_g"),
-        !is.na(Family)  & !startsWith(Family, "midas")  ~ paste0(Family, "_sp_f"),
-        !is.na(Order)   & !startsWith(Order, "midas")   ~ paste0(Order, "_sp_o"),
-        !is.na(Class)   & !startsWith(Class, "midas")   ~ paste0(Class, "_sp_c"),
-        !is.na(Phylum)  & !startsWith(Phylum, "midas")  ~ paste0(Phylum, "_sp_p"),
-        .default = Species 
-      )
-    ) %>%
-    group_by(Species_tmp) %>%
-    mutate(
-      Species_updated = if (n() == 1) {
-        Species_tmp
-      } else {
-        paste0(Species_tmp, "-", row_number())  
-      }
-    ) %>%
-    ungroup() %>%
-    select(-Species_tmp)
-  
   # ----- Subset abundance ------
   # At least one sample has Abundance > rel_ab_cutoff
   high_ab_taxa <- get_rel_ASV(ps) %>%
     filter(OTU %in% all_sig_taxa) %>%
-    left_join(sig_taxa_tbl, join_by(OTU)) %>%
     filter(Abundance > rel_ab_cutoff) %>%
-    distinct(Species_updated) %>%
-    pull(Species_updated)
+    distinct(OTU) %>%
+    pull(OTU)
   
-  low_ab_taxa <- setdiff(sig_taxa_tbl$Species_updated, high_ab_taxa)
+  low_ab_taxa <- setdiff(all_sig_taxa, high_ab_taxa)
   
     
   # --- Write Data to Excel
@@ -67,7 +41,7 @@ get_ancom_taxa <- function(fname_in, ps, p_threshold, rel_ab_cutoff, write2excel
     write_xlsx(taxa_df, path = fname_out)
   } 
   return(list(
-    name_tbl = sig_taxa_tbl,
+    sig_taxa = all_sig_taxa,
     high_ab = high_ab_taxa,
     low_ab  = low_ab_taxa
   ))
@@ -93,39 +67,13 @@ get_aldex_taxa <- function(fname_in, ps, p_threshold, effect_threshold, rel_ab_c
     filter(!is.na(Phylum)) %>%
     pull(OTU)
   
-  # Rename ASVs based on taxonomy
-  sig_taxa_tbl <- taxonomy %>%
-    filter(OTU %in% all_sig_taxa) %>%
-    mutate(
-      Species_tmp = case_when(
-        !is.na(Species) & !startsWith(Species, "midas") ~ Species,
-        !is.na(Genus)   & !startsWith(Genus, "midas")   ~ paste0(Genus, "_sp_g"),
-        !is.na(Family)  & !startsWith(Family, "midas")  ~ paste0(Family, "_sp_f"),
-        !is.na(Order)   & !startsWith(Order, "midas")   ~ paste0(Order, "_sp_o"),
-        !is.na(Class)   & !startsWith(Class, "midas")   ~ paste0(Class, "_sp_c"),
-        !is.na(Phylum)  & !startsWith(Phylum, "midas")  ~ paste0(Phylum, "_sp_p"),
-        .default = Species 
-      )
-    ) %>%
-    group_by(Species_tmp) %>%
-    mutate(
-      Species_updated = if (n() == 1) {
-        Species_tmp
-      } else {
-        paste0(Species_tmp, "-", row_number())  
-      }
-    ) %>%
-    ungroup() %>%
-    select(-Species_tmp)
-  
   # ----- Subset abundance ------
   # At least one sample has Abundance > rel_ab_cutoff
   high_ab_taxa <- get_rel_ASV(ps) %>%
     filter(OTU %in% all_sig_taxa) %>%
-    left_join(sig_taxa_tbl, join_by(OTU)) %>%
     filter(Abundance > rel_ab_cutoff) %>%
-    distinct(Species_updated) %>%
-    pull(Species_updated)
+    distinct(OTU) %>%
+    pull(OTU)
   
   low_ab_taxa <- setdiff(sig_taxa_tbl$Species_updated, high_ab_taxa)
   
@@ -141,7 +89,7 @@ get_aldex_taxa <- function(fname_in, ps, p_threshold, effect_threshold, rel_ab_c
     write_xlsx(taxa_df, path = fname_out)
   }
   return(list(
-    name_tbl = sig_taxa_tbl,
+    sig_taxa = all_sig_taxa,
     high_ab = high_ab_taxa,
     low_ab  = low_ab_taxa
   ))
