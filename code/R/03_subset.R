@@ -74,7 +74,7 @@ get_aldex_taxa <- function(fname_in, ps, p_threshold, effect_threshold, rel_ab_c
     distinct(OTU) %>%
     pull(OTU)
   
-  low_ab_taxa <- setdiff(sig_taxa_tbl$Species_updated, high_ab_taxa)
+  low_ab_taxa <- setdiff(all_sig_taxa, high_ab_taxa)
   
   
   # --- Write Data to Excel
