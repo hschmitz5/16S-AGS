@@ -41,7 +41,6 @@ get_ancom_taxa <- function(fname_in, ps, p_threshold, rel_ab_cutoff, write2excel
     write_xlsx(taxa_df, path = fname_out)
   } 
   return(list(
-    sig_taxa = all_sig_taxa,
     high_ab = high_ab_taxa,
     low_ab  = low_ab_taxa
   ))
@@ -89,7 +88,6 @@ get_aldex_taxa <- function(fname_in, ps, p_threshold, effect_threshold, rel_ab_c
     write_xlsx(taxa_df, path = fname_out)
   }
   return(list(
-    sig_taxa = all_sig_taxa,
     high_ab = high_ab_taxa,
     low_ab  = low_ab_taxa
   ))
