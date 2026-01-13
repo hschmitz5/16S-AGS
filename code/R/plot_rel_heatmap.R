@@ -40,9 +40,8 @@ rel_wide <- get_rel_ASV(ps) %>%
 data_mat <- rel_wide %>%
   column_to_rownames("OTU") %>%
   as.matrix() %>%
-  .[, sam_name] 
-# %>% # reorder columns 
-#   { log10(. + pseudo) }
+  .[, sam_name] %>% # reorder columns 
+  { log10(. + pseudo) }
 
 
 # ---- Plotting
@@ -52,7 +51,7 @@ split = rep(1:n_sizes, each = n_replicates)
 
 row_fontface <- ifelse(rownames(data_mat) %in% DA_taxa, "bold", "plain")
 
-ht_colors <- met.brewer("Hokusai2", type = "continuous")
+ht_colors <- met.brewer(taxa_pal, type = "continuous")
 ha_colors <- met.brewer(size_pal, n_sizes)
 
 size_annot <- HeatmapAnnotation(sz = anno_block(gp = gpar(fill = ha_colors),
@@ -63,7 +62,7 @@ ht <- Heatmap(
   data_mat,
   column_split = split,
   top_annotation = size_annot,
-  name = "Rel Ab [%]",
+  #name = "Rel Ab [Log(%)]",
   cluster_columns = FALSE,
   show_heatmap_legend = FALSE,
   show_row_names = TRUE,
@@ -83,7 +82,7 @@ lgd <- Legend(
     seq(min(data_mat), max(data_mat), length.out = length(ht_colors)),
     ht_colors
   ),
-  title = "Rel Ab [%]",
+  title = "Rel Ab [Log(%)]",
   direction = "horizontal",
   title_position = "lefttop",
   at = pretty(c(min(data_mat), max(data_mat))),
