@@ -5,7 +5,7 @@ p_threshold   <- 0.05
 
 # Color Palettes (MetBrewer)
 size_pal <- "Java"
-taxa_pal <- "Hiroshige"
+taxa_pal <- "Hokusai2"
 
 # File Names
 ps_fname    <- "./data/ps_ASV_subset.rds"
