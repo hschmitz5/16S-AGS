@@ -81,10 +81,6 @@ data_mat <- combine_names(rel_wide) %>%
 
 # # pseudo <- 1e-6  # choose based on detection limit
 # data_mat <- rel_wide %>%
-#   column_to_rownames("OTU") %>%
-#   as.matrix() %>%
-#   .[, sam_name] 
-# # %>% # reorder columns 
 # #   { log10(. + pseudo) }
 
 
