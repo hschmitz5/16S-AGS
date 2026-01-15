@@ -22,14 +22,6 @@ cell_w <- 0.6 # same as cell_h
 row_fontsize <- 10
 col_fontsize <- 11
 
-# names of significant taxa
-sig_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel, fname_excel)
-
-# Read in data and add new names
-output <- readRDS(ancom_fname)
-res_prim <- output$res %>% 
-  rename(OTU = taxon) 
-
 # Define matrix of log-fold change data per size
 process_lfc <- function(df, taxa) {
   df %>%
@@ -48,6 +40,14 @@ process_lfc <- function(df, taxa) {
     rename_with(~ paste0(., "-S"), c("M", "L", "XL", "XXL")) %>%
     arrange(desc(mean_lfc))
 }
+
+# names of significant taxa
+sig_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel, fname_excel)
+
+# Read in data and add new names
+output <- readRDS(ancom_fname)
+res_prim <- output$res %>% 
+  rename(OTU = taxon)
 
 # Apply function to high and low abundance taxa
 lfc_high <- process_lfc(res_prim, sig_taxa$high_ab)
