@@ -3,6 +3,7 @@ source("./code/R/01_load_data.R")
 source("./code/R/02_process_ps.R")
 source("./code/R/03_subset.R")
 library(ComplexHeatmap)
+library(circlize)
 
 fname_rel <- "./figures/rel_ab_heatmap.png"
 
@@ -34,14 +35,57 @@ rel_wide <- get_rel_ASV(ps) %>%
   pivot_wider(
     names_from = Sample,
     values_from = Abundance
-  ) 
+  ) %>%
+  .[, c("OTU", sam_name)] %>%
+  mutate(
+    sig_taxa = ifelse(OTU %in% DA_taxa, "T", "F")
+  )
 
-# pseudo <- 1e-6  # choose based on detection limit
-data_mat <- rel_wide %>%
-  column_to_rownames("OTU") %>%
-  as.matrix() %>%
-  .[, sam_name] %>% # reorder columns 
-  { log10(. + pseudo) }
+combine_names <- function(data) {
+  data_combined <- data %>%
+    mutate(
+      name_prefix = sub("_[^_]+$", "", OTU)
+    ) %>%
+    group_by(sig_taxa, name_prefix) %>%
+    summarise(
+      OTU = paste0(first(OTU), sig_taxa),
+      across(all_of(sam_name), \(x) sum(x, na.rm = TRUE)),
+      .groups = "drop"
+    )  %>%
+   select(-name_prefix)
+}
+
+combine_names <- function(data) {
+  data %>%
+    mutate(name_prefix = sub("_[^_]+$", "", OTU)) %>%
+    
+    # group by sig_taxa + name_prefix
+    group_by(sig_taxa, name_prefix) %>%
+    
+    # sum numeric columns
+    summarise(
+      across(all_of(sam_name), \(x) sum(x, na.rm = TRUE)),  # sum all abundance columns
+      .groups = "drop"
+    ) %>%
+    
+    # create OTU name **after aggregation**
+    mutate(OTU = paste0(name_prefix, "_", sig_taxa)) %>%
+    
+    # reorder columns if needed
+    select(OTU, all_of(sam_name))
+}
+
+
+data_mat <- combine_names(rel_wide) %>%
+  column_to_rownames("OTU") 
+
+# # pseudo <- 1e-6  # choose based on detection limit
+# data_mat <- rel_wide %>%
+#   column_to_rownames("OTU") %>%
+#   as.matrix() %>%
+#   .[, sam_name] 
+# # %>% # reorder columns 
+# #   { log10(. + pseudo) }
 
 
 # ---- Plotting
@@ -92,8 +136,8 @@ lgd <- Legend(
 # Draw combined heatmap
 png(fname_rel,
     width = 8,  # width in inches; can adjust
-    height = 12, # height in inches; can adjust
+    height = 11.5, # height in inches; can adjust
     units = "in", res = 300)
 draw(ht)
-draw(lgd, x = unit(0.41, "npc"), y = unit(0.96, "npc"), just = c("center", "top"))
+draw(lgd, x = unit(0.41, "npc"), y = unit(0.99, "npc"), just = c("center", "top"))
 dev.off()
