@@ -108,10 +108,10 @@ get_aldex_taxa <- function(fname_in, ps, p_threshold, effect_threshold, rel_ab_c
 
 get_common_taxa <- function(ancom_fname, aldex_fname, p_threshold, effect_threshold) {
   # names of significant taxa
-  all_taxa_ancom <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel, fname_out) 
+  all_taxa_ancom <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel = NULL, fname_out) 
   high_ancom <- all_taxa_ancom$high_ab
   
-  all_taxa_aldex <- get_aldex_taxa(aldex_fname, ps, p_threshold, effect_threshold, rel_ab_cutoff, write2excel, fname_out)
+  all_taxa_aldex <- get_aldex_taxa(aldex_fname, ps, p_threshold, effect_threshold, rel_ab_cutoff, write2excel = NULL, fname_out)
   high_aldex <- all_taxa_aldex$high_ab
   
   common_taxa <- intersect(high_ancom, high_aldex) 
