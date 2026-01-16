@@ -16,12 +16,14 @@ cell_w <- 0.2
 row_fontsize <- 10
 col_fontsize <- 11
 
+write2excel <- FALSE 
+
 # Choose DA Taxa
 ancom_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel = FALSE)
 DA_taxa <- ancom_taxa$high_ab 
 
 # Common taxa (ANCOM & ALDEx)
-#DA_taxa2 <- get_common_taxa(ancom_fname, aldex_fname, p_threshold, effect_threshold)
+DA_taxa2 <- get_common_taxa(ancom_fname, aldex_fname, p_threshold, effect_threshold)
 
 # -------- Define groups ---------
 
