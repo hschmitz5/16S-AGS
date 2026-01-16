@@ -1,3 +1,4 @@
+rm(list = ls())
 source("./code/R/00_setup.R")
 source("./code/R/01_load_data.R")
 source("./code/R/02_process_ps.R")
@@ -42,54 +43,49 @@ rel_wide <- get_rel_ASV(ps) %>%
   )
 
 combine_names <- function(data) {
-  data_combined <- data %>%
+  data %>%
     mutate(
-      name_prefix = sub("_[^_]+$", "", OTU)
+      name_prefix = if_else(
+        grepl("[0-9]$", OTU),       # last character is a number
+        sub("-[^-]+$", "", OTU),    # remove last dash and everything after
+        OTU                         # last character is a letter → keep full OTU
+      )
     ) %>%
     group_by(sig_taxa, name_prefix) %>%
     summarise(
-      OTU = paste0(first(OTU), sig_taxa),
+      n = n(),
+      OTU_orig = first(OTU),  # only used when n = 1
       across(all_of(sam_name), \(x) sum(x, na.rm = TRUE)),
       .groups = "drop"
-    )  %>%
-   select(-name_prefix)
-}
-
-combine_names <- function(data) {
-  data %>%
-    mutate(name_prefix = sub("_[^_]+$", "", OTU)) %>%
-    
-    # group by sig_taxa + name_prefix
-    group_by(sig_taxa, name_prefix) %>%
-    
-    # sum numeric columns
-    summarise(
-      across(all_of(sam_name), \(x) sum(x, na.rm = TRUE)),  # sum all abundance columns
-      .groups = "drop"
     ) %>%
-    
-    # create OTU name **after aggregation**
-    mutate(OTU = paste0(name_prefix, "_", sig_taxa)) %>%
-    
-    # reorder columns if needed
-    select(OTU, all_of(sam_name))
+    mutate(
+      OTU = if_else(
+        n == 1,
+        OTU_orig,
+        paste0(name_prefix, "_", sig_taxa)
+      )
+    ) %>%
+    select(OTU, sig_taxa, all_of(sam_name))
 }
 
+pseudo <- 1e-6  # choose based on detection limit
 
 data_mat <- combine_names(rel_wide) %>%
-  column_to_rownames("OTU") 
+  select(-sig_taxa) %>%
+  column_to_rownames("OTU") %>%
+  as.matrix() %>%
+  { log10(. + pseudo) }
 
-# # pseudo <- 1e-6  # choose based on detection limit
-# data_mat <- rel_wide %>%
-# #   { log10(. + pseudo) }
-
+DA_taxa_renamed <- combine_names(rel_wide) %>%
+  filter(sig_taxa == "T") %>%
+  pull(OTU)
 
 # ---- Plotting
 n_cols <- ncol(data_mat)
 n_rows <- nrow(data_mat)
 split = rep(1:n_sizes, each = n_replicates)
 
-row_fontface <- ifelse(rownames(data_mat) %in% DA_taxa, "bold", "plain")
+row_fontface <- ifelse(rownames(data_mat) %in% DA_taxa_renamed, "bold", "plain")
 
 ht_colors <- met.brewer(taxa_pal, type = "continuous")
 ha_colors <- met.brewer(size_pal, n_sizes)
@@ -132,7 +128,7 @@ lgd <- Legend(
 # Draw combined heatmap
 png(fname_rel,
     width = 8,  # width in inches; can adjust
-    height = 11.5, # height in inches; can adjust
+    height = 9.5, # height in inches; can adjust
     units = "in", res = 300)
 draw(ht)
 draw(lgd, x = unit(0.41, "npc"), y = unit(0.99, "npc"), just = c("center", "top"))
