@@ -9,12 +9,12 @@ fname_div <- "./figures/diversity.png"
 div_type = c("Shannon")
 
 # Faith's phylogenetic diversity
-metadata <- get_metadata(ps_ASV)
+metadata <- get_metadata(ps)
 
-comm <- as.data.frame(as.matrix(ps_ASV@otu_table)) %>%
+comm <- as.data.frame(as.matrix(ps@otu_table)) %>%
   t() 
 
-phy <- ps_ASV@phy_tree
+phy <- ps@phy_tree
 
 pd_results <- pd(comm, phy) %>%
   rownames_to_column(var = "Sample") %>%
@@ -22,7 +22,7 @@ pd_results <- pd(comm, phy) %>%
 
 # head(pd_results)
 
-p1 <- plot_richness(ps_ASV, x = "size.name", measures = div_type) +
+p1 <- plot_richness(ps, x = "size.name", measures = div_type) +
   geom_point() + 
   labs(
     x = "Size",

@@ -1,3 +1,4 @@
+rm(list = ls())
 source("./code/R/00_setup.R")
 source("./code/R/01_load_data.R")
 source("./code/R/02_process_ps.R")
@@ -9,11 +10,11 @@ txt_fname <- "./figures/ANOSIM.txt"
 # Define a base font size in points
 text_size <- 10
 
-ps.dist <- distance(ps_ASV, method = "wunifrac" ) # weighted
+ps.dist <- distance(ps, method = "wunifrac" ) # weighted
 invisible(ps.dist)
 #show(ps.dist)
 
-metadata <- get_metadata(ps_ASV)
+metadata <- get_metadata(ps)
 
 ps.ano <- anosim(ps.dist, metadata$size.name, permutations = 9999)
 
