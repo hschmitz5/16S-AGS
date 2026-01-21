@@ -1,34 +1,38 @@
 source("./code/R/00_setup.R")
 source("./code/R/01_load_data.R")
 source("./code/R/02_process_ps.R")
+source("./code/R/03_subset.R")
 
 # display top n most abundant genera
 n_display <- 10
 
 fname <- "./figures/abund_size_stacked.png"
 
-genus_size <- get_rel_genus(ps) %>%
-  dplyr::select(Sample, size.mm, size.name, Genus, Abundance) %>%
+# names of significant taxa
+write2excel = FALSE
+sig_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel, fname_excel)
+
+ASV_size <- get_rel_ASV(ps) %>%
+  dplyr::select(Sample, size.mm, size.name, OTU, Abundance) %>%
   # Rename genera outside top n_display as "Other"
   mutate(
-    Genus = ifelse(is.na(Genus) | !(Genus %in% high_ab_genera[1:n_display]), "Other", Genus)
+    OTU = ifelse(is.na(OTU) | !(OTU %in% sig_taxa$high_ab[1:n_display]), "Other", OTU)
   ) %>%
-  group_by(Sample, size.mm, size.name, Genus) %>%
+  group_by(Sample, size.mm, size.name, OTU) %>%
   summarise(
     Abundance = sum(Abundance),
     .groups = "drop"
   ) %>%
-  mutate(Genus = factor(Genus, levels = c(high_ab_genera[1:n_display], "Other")))
+  mutate(OTU = factor(OTU, levels = c(sig_taxa$high_ab[1:n_display], "Other")))
   
-#n_display <- length(unique(genus_size$Genus)) - 1
 
-p <- ggplot(genus_size, aes(x = Sample, y = Abundance, fill = fct_rev(Genus))) +
+p <- ggplot(ASV_size, aes(x = Sample, y = Abundance, fill = fct_rev(OTU))) +
   # group samples by size
   facet_grid(. ~ size.name, scales = "free_x", space = "free_x", switch = "x") +  
   geom_col(width = 0.95) + # space between same size
   scale_fill_manual(
     values = c("gray", met.brewer(taxa_pal, n_display)),
-    name = "Genera"
+    name = "ASV"
   ) +
   labs(
     x = "Size",
