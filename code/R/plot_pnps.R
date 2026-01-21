@@ -4,7 +4,7 @@ library(readxl)
 library(tidyverse)
 library(MetBrewer)
 
-fname_in  <- "./data/EPS_loss.xlsx"
+fname_in  <- "./data/EPS_moduli.xlsx"
 fname_out <- "./figures/PNPS.png"
 
 taxa_pal <- "Hiroshige"
