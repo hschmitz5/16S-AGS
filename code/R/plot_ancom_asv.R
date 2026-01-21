@@ -75,11 +75,13 @@ create_heatmap <- function(mat, rowname_w = NULL, col_title = NULL) {
     mat,
     name = "log fold\nchange",
     cluster_columns = FALSE,
+    show_heatmap_legend = FALSE,
     show_row_names = TRUE,
     show_column_names = TRUE,
     column_names_rot = 0,
     column_names_centered = TRUE,
     column_title = col_title,
+    #col = ht_colors,
     # size
     width  = unit(n_cols * cell_w, "inches"),
     height = unit(n_rows * cell_h, "inches"),
@@ -94,8 +96,18 @@ create_heatmap <- function(mat, rowname_w = NULL, col_title = NULL) {
   do.call(Heatmap, args)
 }
 
+ht_high <- create_heatmap(fig_high, NULL, paste0("ANCOM-BC2 DA Taxa"))
 
-ht_high <- create_heatmap(fig_high, NULL, paste0("Abundance > ",rel_ab_cutoff,"%"))
+col_fun <- colorRamp2(c(min(fig_high), 0, max(fig_high)), c("blue", "white", "red"))
+
+lgd <- Legend(
+  col_fun = col_fun,
+  title = "log fold\nchange",
+  direction = "horizontal",
+  title_position = "lefttop",
+  at = pretty(c(min(fig_high), max(fig_high))),
+  labels = pretty(c(min(fig_high), max(fig_high)))
+)
 
 # Define rowname width in first plot
 ht_grob <- draw(ht_high, show_heatmap_legend = FALSE)
@@ -109,13 +121,25 @@ rowname_width_in <- convertWidth(
 
 ht_low  <- create_heatmap(fig_low, rowname_width_in, paste0(n_display_low, " largest lfc"))
 
+col_fun2 <- colorRamp2(c(min(fig_low), 0, max(fig_low)), c("blue", "white", "red"))
+
+lgd2 <- Legend(
+  col_fun = col_fun2,
+  title = "log fold\nchange",
+  direction = "horizontal",
+  title_position = "lefttop",
+  at = pretty(c(min(fig_low), max(fig_low))),
+  labels = pretty(c(min(fig_low), max(fig_low)))
+)
+
 # Save images
 common_width <- ncol(fig_high) * cell_w + rowname_width_in + 2 # in
 png(fname_high, 
     width = common_width,
-    height = nrow(fig_high) * cell_h + 1,
+    height = nrow(fig_high) * cell_h + 1.5,
     units = "in", res = 300)
 draw(ht_high)
+draw(lgd, x = unit(0.41, "npc"), y = unit(0.99, "npc"), just = c("center", "top"))
 dev.off()
 
 # png(fname_low,
@@ -123,4 +147,5 @@ dev.off()
 #     height = nrow(fig_low) * cell_h + 1,
 #     units = "in", res = 300)
 # draw(ht_low)
+# draw(lgd2, x = unit(0.41, "npc"), y = unit(0.99, "npc"), just = c("center", "top"))
 # dev.off()
