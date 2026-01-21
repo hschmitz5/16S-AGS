@@ -10,22 +10,21 @@ source("./code/R/04_bias_correct.R")
 fname_out <- "./figures/BC_comparison.png"
   
 # names of significant taxa
-all_taxa_ancom <- get_ancom_taxa(ancom_fname, p_threshold, write2excel = FALSE, fname_out = NULL)
-high_ab_taxa <- high_ab_genera[high_ab_genera %in% all_taxa_ancom]
+sig_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel = FALSE, fname_excel)
 
 # Load Data
 table_bc_long <- get_bc_abund(ancom_fname) %>%
-  filter(Genus %in% high_ab_taxa) %>%
-  mutate(Genus = factor(Genus, levels = high_ab_genera)) 
+  filter(OTU %in% sig_taxa$high_ab) %>%
+  mutate(OTU = factor(OTU, levels = sig_taxa$high_ab)) 
 
-table_rel_long <- get_rel_genus(ps_ASV) %>%
-  filter(Genus %in% high_ab_taxa) %>%
-  dplyr::select(Sample, size.mm, size.name, Genus, Abundance) %>%
-  mutate(Genus = factor(Genus, levels = high_ab_genera))
+table_rel_long <- get_rel_ASV(ps) %>%
+  filter(OTU %in% sig_taxa$high_ab) %>%
+  dplyr::select(Sample, size.mm, size.name, OTU, Abundance) %>%
+  mutate(OTU = factor(OTU, levels = sig_taxa$high_ab))
 
 # Merge into one long-format dataframe
 merged_long <- full_join(table_bc_long, table_rel_long, 
-                         by = c("Sample", "Genus", "size.mm", "size.name")) %>%
+                         by = c("Sample", "OTU", "size.mm", "size.name")) %>%
   pivot_longer(cols = c(bc_abund, Abundance),
                names_to = "Metric", values_to = "Value")
 
@@ -33,7 +32,7 @@ merged_long <- full_join(table_bc_long, table_rel_long,
 # ---- Plotting -------
 
 merged_scaled <- merged_long %>%
-  group_by(Genus) %>%
+  group_by(OTU) %>%
   mutate(
     # Scale bc_abund to the range of Abundance
     Value_scaled = case_when(
@@ -62,7 +61,7 @@ p <- ggplot(merged_scaled, aes(x = size.name, y = Value_scaled, color = Metric))
     axis.text.x = element_text(angle = 0, hjust = 0.5),
     legend.position = "top"
   ) +
-  facet_wrap(~Genus, scales = "free_y", ncol = 3) +
+  facet_wrap(~OTU, scales = "free_y", ncol = 3) +
   labs(x = "Size", 
        color = "Metric")
 
