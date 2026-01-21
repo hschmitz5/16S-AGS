@@ -6,7 +6,7 @@ effect_threshold <- 1 # used for ALDEx DA
 
 # Color Palettes (MetBrewer)
 size_pal <- "Java"
-taxa_pal <- "Hokusai2"
+taxa_pal <- "Hiroshige" #"Hokusai2"
 
 # File Names
 ps_fname    <- "./data/ps_ASV_subset.rds"
