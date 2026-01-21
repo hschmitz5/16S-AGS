@@ -17,32 +17,32 @@ source("./code/R/00_setup.R")
 source("./code/R/01_load_data.R")
 source("./code/R/02_process_ps.R")
 source("./code/R/03_subset.R")
-source("./code/R/04_subset_DA.R")
-source("./code/R/05_bias_correct.R")
+source("./code/R/04_bias_correct.R")
 
 # Choose DA taxa
-all_taxa_ancom <- get_ancom_taxa(ancom_fname, p_threshold)
-DA_taxa <- high_ab_genera[high_ab_genera %in% all_taxa_ancom]
+write2excel = FALSE
+ancom_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel, fname_excel)
+DA_taxa <- ancom_taxa$high_ab 
 # Common taxa (ANCOM & ALDEx)
-# DA_taxa <- get_common_taxa(ancom_fname, aldex_fname, p_threshold, effect_threshold, high_ab_genera)
+# DA_taxa2 <- get_common_taxa(ancom_fname, aldex_fname, p_threshold, effect_threshold)
 
 bc_wide <- get_bc_abund(ancom_fname) %>%
-  filter(Genus %in% DA_taxa) %>%
-  group_by(Genus, size.name) %>%
+  filter(OTU %in% DA_taxa) %>%
+  group_by(OTU, size.name) %>%
   summarise(mean_ab = mean(bc_abund), sd_ab = sd(bc_abund), .groups = "drop") %>%
-  dplyr::select(Genus, size.name, mean_ab) %>%
+  dplyr::select(OTU, size.name, mean_ab) %>%
   pivot_wider(
     names_from = size.name,
     values_from = mean_ab
   ) %>%
-  column_to_rownames("Genus") %>%
+  column_to_rownames("OTU") %>%
   as.matrix()
 
 # Correlation
 corr_mu <- map_dfr(1:nrow(bc_wide), function(i) {
   res <- cor.test(bc_wide[i, ], mu$mu, method = "spearman")
   tibble(
-    Genus = rownames(bc_wide)[i],
+    OTU = rownames(bc_wide)[i],
     # correlation coefficient (+ increasing, - decreasing)
     estimate = res$estimate, 
     p.value = res$p.value
@@ -58,9 +58,9 @@ print(corr_mu)
 corr_tb <- map_dfr(1:nrow(bc_wide), function(i) {
   res <- cor.test(bc_wide[i, ], eps$TB.avg, method = "spearman")
   tibble(
-    Genus = rownames(bc_wide)[i],
+    OTU = rownames(bc_wide)[i],
     # correlation coefficient (+ increasing, - decreasing)
-    estimate = res$estimate, 
+    estimate = res$estimate,
     p.value = res$p.value
   ) %>%
   filter(p.value < p_threshold)
@@ -71,9 +71,9 @@ print(corr_tb)
 # corr_lb <- map_dfr(1:nrow(bc_wide), function(i) {
 #   res <- cor.test(bc_wide[i, ], eps$LB.avg, method = "spearman")
 #   tibble(
-#     Genus = rownames(bc_wide)[i],
+#     OTU = rownames(bc_wide)[i],
 #     # correlation coefficient (+ increasing, - decreasing)
-#     estimate = res$estimate, 
+#     estimate = res$estimate,
 #     p.value = res$p.value
 #   ) %>%
 #   filter(p.value < p_threshold)
