@@ -34,7 +34,7 @@ eps_long <- eps %>%
 
 ggplot(data = eps_long, aes(x = size.name, y = pnps.avg, color = extract.type)) +
   geom_point(position = position_dodge(width = 0.2), size = 2) +
-  geom_line(aes(group = extract.type)) +
+  #geom_line(aes(group = extract.type)) +
   geom_errorbar(
     aes(ymin = pnps.avg - pnps.sd, ymax = pnps.avg + pnps.sd),
     width = 0.2,
