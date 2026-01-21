@@ -2,6 +2,9 @@ library(magick)
 
 fname_out <- "./figures/rel_ab_DA_combined.png"
 
+fname_rel <- "./figures/rel_ab_heatmap.png"
+fname_high  <- "./figures/DA_ancom_high.png"
+
 # Read images
 img_left  <- image_read(fname_rel)
 img_right <- image_read(fname_high)
