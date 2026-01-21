@@ -129,7 +129,7 @@ lgd <- Legend(
 
 # Draw combined heatmap
 png(fname_rel,
-    width = 8,  # width in inches; can adjust
+    width = 5.5,  # width in inches; can adjust
     height = 9.5, # height in inches; can adjust
     units = "in", res = 300)
 draw(ht)
