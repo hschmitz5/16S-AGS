@@ -12,12 +12,13 @@ output:
 # Correlate Taxa with mu
 ```{r corr_taxa_mu}
 rm(list = ls())
-
 source("./code/R/00_setup.R")
 source("./code/R/01_load_data.R")
 source("./code/R/02_process_ps.R")
 source("./code/R/03_subset.R")
 source("./code/R/04_bias_correct.R")
+
+p_threshold <- 0.15
 
 # Choose DA taxa
 write2excel = FALSE
@@ -26,7 +27,7 @@ DA_taxa <- ancom_taxa$high_ab
 # Common taxa (ANCOM & ALDEx)
 # DA_taxa2 <- get_common_taxa(ancom_fname, aldex_fname, p_threshold, effect_threshold)
 
-bc_wide <- get_bc_abund(ancom_fname) %>%
+rel_bc <- get_bc_abund(ancom_fname) %>%
   filter(OTU %in% DA_taxa) %>%
   group_by(OTU, size.name) %>%
   summarise(mean_ab = mean(bc_abund), sd_ab = sd(bc_abund), .groups = "drop") %>%
@@ -39,39 +40,47 @@ bc_wide <- get_bc_abund(ancom_fname) %>%
   as.matrix()
 
 # Correlation
-corr_mu <- map_dfr(1:nrow(bc_wide), function(i) {
-  res <- cor.test(bc_wide[i, ], mu$mu, method = "spearman")
+corr_mu <- map_dfr(1:nrow(rel_bc), function(i) {
+  res <- cor.test(rel_bc[i, ], mu$mu, method = "spearman")
   tibble(
-    OTU = rownames(bc_wide)[i],
+    OTU = rownames(rel_bc)[i],
     # correlation coefficient (+ increasing, - decreasing)
     estimate = res$estimate, 
     p.value = res$p.value
-  ) %>%
-  filter(p.value < p_threshold)
+  ) 
 })
 
-print(corr_mu)
+# Adjust p-values for multiple comparisons
+corr_mu_adj <- corr_mu %>%
+  mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
+  filter(p.adj < p_threshold)
+
+print(corr_mu_adj)
 ```
 
 # Correlate Taxa with EPS
 ```{r corr_taxa_eps}
-corr_tb <- map_dfr(1:nrow(bc_wide), function(i) {
-  res <- cor.test(bc_wide[i, ], eps$TB.avg, method = "spearman")
+corr_tb <- map_dfr(1:nrow(rel_bc), function(i) {
+  res <- cor.test(rel_bc[i, ], eps$TB.avg, method = "spearman")
   tibble(
-    OTU = rownames(bc_wide)[i],
+    OTU = rownames(rel_bc)[i],
     # correlation coefficient (+ increasing, - decreasing)
     estimate = res$estimate,
     p.value = res$p.value
-  ) %>%
-  filter(p.value < p_threshold)
+  )
 })
 
-print(corr_tb)
+# Adjust p-values for multiple comparisons
+corr_tb_adj <- corr_tb %>%
+  mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
+  filter(p.adj < p_threshold)
 
-# corr_lb <- map_dfr(1:nrow(bc_wide), function(i) {
-#   res <- cor.test(bc_wide[i, ], eps$LB.avg, method = "spearman")
+print(corr_tb_adj)
+
+# corr_lb <- map_dfr(1:nrow(rel_bc), function(i) {
+#   res <- cor.test(rel_bc[i, ], eps$LB.avg, method = "spearman")
 #   tibble(
-#     OTU = rownames(bc_wide)[i],
+#     OTU = rownames(rel_bc)[i],
 #     # correlation coefficient (+ increasing, - decreasing)
 #     estimate = res$estimate,
 #     p.value = res$p.value
@@ -79,7 +88,12 @@ print(corr_tb)
 #   filter(p.value < p_threshold)
 # })
 # 
-# print(corr_lb)
+# # Adjust p-values for multiple comparisons
+# corr_lb_adj <- corr_lb %>%
+#   mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
+#   filter(p.adj < p_threshold)
+# 
+# print(corr_lb_adj)
 ```
 
 # Correlate mu and EPS and size
@@ -102,6 +116,11 @@ results <- map_dfr(var_pairs, ~ cor.test(merged[[.x[1]]], merged[[.x[2]]], metho
                      broom::tidy(), .id = "comparison") %>%
   dplyr::select(comparison, estimate, p.value)
 
-print(results)
+# Adjust p-values for multiple comparisons
+results_adj <- results %>%
+  mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
+  filter(p.adj < p_threshold)
+
+print(results_adj)
 
 ```
