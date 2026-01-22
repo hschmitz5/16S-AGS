@@ -13,18 +13,25 @@ ps.ord1 <- ordinate(ps, "PCoA", "wunifrac")
 # ps_full: all sample groups
 ps.ord2 <- ordinate(ps_full, "PCoA", "wunifrac")
 
+# colors
 cols <- met.brewer(size_pal, n_sizes)
 
-p1 <- plot_ordination(ps, ps.ord1, type="samples", color="size.name") +
+# symbol
+# 16 = filled circle, 17 = triangle, 15 = square, 18 = diamond, etc.
+shapes <- c(17, 15, 18, 3, 7)
+
+p1 <- plot_ordination(ps, ps.ord1, type="samples", color="size.name", shape = "size.name") +
   scale_color_manual(values = cols) +
-  labs(title="Granular biomass", color = "Size") +
+  scale_shape_manual(values = shapes) +
+  labs(title="Granular biomass", color = "Size", shape = "Size") +
   theme_minimal(base_size = 12) +
   theme(plot.title = element_text(size = 12)) +
-  guides(color = "none")
+  guides(color = "none", shape = "none")
 
-p2 <- plot_ordination(ps_full, ps.ord2, type="samples", color="size.name") +
+p2 <- plot_ordination(ps_full, ps.ord2, type="samples", color="size.name", shape = "size.name") +
   scale_color_manual(values = c("gray", cols)) +
-  labs(title="Flocs & granules", color = "Size") +
+  scale_shape_manual(values = c(16, shapes)) +
+  labs(title="Flocs & granules", color = "Size", shape = "Size") +
   theme_minimal(base_size = 12) +
   theme(
     plot.title = element_text(size = 12),   
