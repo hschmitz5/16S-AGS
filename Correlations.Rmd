@@ -72,8 +72,7 @@ corr_tb <- map_dfr(1:nrow(rel_bc), function(i) {
 
 # Adjust p-values for multiple comparisons
 corr_tb_adj <- corr_tb %>%
-  mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
-  filter(p.adj < p_threshold)
+  mutate(p.adj = p.adjust(p.value, method = "BH")) 
 
 print(corr_tb_adj)
 
@@ -84,14 +83,12 @@ print(corr_tb_adj)
 #     # correlation coefficient (+ increasing, - decreasing)
 #     estimate = res$estimate,
 #     p.value = res$p.value
-#   ) %>%
-#   filter(p.value < p_threshold)
+#   ) 
 # })
 # 
 # # Adjust p-values for multiple comparisons
 # corr_lb_adj <- corr_lb %>%
-#   mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
-#   filter(p.adj < p_threshold)
+#   mutate(p.adj = p.adjust(p.value, method = "BH")) 
 # 
 # print(corr_lb_adj)
 ```
@@ -118,8 +115,7 @@ results <- map_dfr(var_pairs, ~ cor.test(merged[[.x[1]]], merged[[.x[2]]], metho
 
 # Adjust p-values for multiple comparisons
 results_adj <- results %>%
-  mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
-  filter(p.adj < p_threshold)
+  mutate(p.adj = p.adjust(p.value, method = "BH")) 
 
 print(results_adj)
 
