@@ -1,3 +1,6 @@
+rm(list = ls())
+source("./code/R/00_setup.R")
+source("./code/R/01_load_data.R")
 library(readxl)
 library(tidyverse)
 library(patchwork)
@@ -41,8 +44,8 @@ p1 <- ggplot(G1, aes(x = freq, y = avg, color = as.factor(size.name))) +
     width = 0.2
   ) +
   scale_color_manual(
-    values = met.brewer(size_pal, n_sizes),
-    name = "Size"
+    name = "Size (p = 0.0167)",
+    values = met.brewer(size_pal, n_sizes)
   ) +
   labs(
     x = "Frequency [rad/s]",
@@ -57,13 +60,14 @@ p2 <- ggplot(G2, aes(x = freq, y = avg, color = as.factor(size.name))) +
     width = 0.2
   ) +
   scale_color_manual(
-    values = met.brewer(size_pal, n_sizes),
-    name = "Size"
+    name = "Size (p = 0.0167)",
+    values = met.brewer(size_pal, n_sizes)
   ) +
   labs(
     x = "Frequency [rad/s]",
     y = "Loss Modulus [Pa]",
   ) 
+
 
 # vertical
 # p <- p1 / p2 + plot_layout(guides = "collect") &
@@ -73,6 +77,12 @@ p2 <- ggplot(G2, aes(x = freq, y = avg, color = as.factor(size.name))) +
 p <- p1 + p2 + 
   plot_layout(guides = "collect") & 
   theme_minimal(base_size = 12) +
-  theme(legend.position = "top")  
+  theme(legend.position = "top") &
+  guides(
+    color = guide_legend(
+      title.position = "top",
+      title.hjust = 0.5 # centers title
+      )
+  )
 
 ggsave(fname_out, plot = p, width = 8, height = 3, dpi = 300)
