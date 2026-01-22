@@ -46,8 +46,8 @@ ggplot(data = eps_long, aes(x = size.name, y = pnps.avg, color = extract.type)) 
   scale_color_manual(
     values = met.brewer(taxa_pal, 2),
     labels = c(
-      LB = "LB (p = 0.517)",
-      TB = "TB (p = 0.233)"
+      LB = "LB (q = 0.517)",
+      TB = "TB (q = 0.389)"
     )
   ) +
   labs(

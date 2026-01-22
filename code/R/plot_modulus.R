@@ -44,7 +44,7 @@ p1 <- ggplot(G1, aes(x = freq, y = avg, color = as.factor(size.name))) +
     width = 0.2
   ) +
   scale_color_manual(
-    name = "Size (p = 0.0167)",
+    name = "Size (q = 0.0833)",
     values = met.brewer(size_pal, n_sizes)
   ) +
   labs(
@@ -60,7 +60,7 @@ p2 <- ggplot(G2, aes(x = freq, y = avg, color = as.factor(size.name))) +
     width = 0.2
   ) +
   scale_color_manual(
-    name = "Size (p = 0.0167)",
+    name = "Size (q = 0.0833)",
     values = met.brewer(size_pal, n_sizes)
   ) +
   labs(
