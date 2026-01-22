@@ -3,6 +3,7 @@ rm(list = ls())
 library(readxl)
 library(tidyverse)
 library(MetBrewer)
+library(cowplot)
 
 fname_in  <- "./data/EPS_moduli.xlsx"
 fname_out <- "./figures/PNPS.png"
@@ -23,24 +24,32 @@ mu$size.name = factor(mu$size.name, levels = size$name)
 
 eps_long <- eps %>%
   pivot_longer(
-    cols = -size.name,                              # all columns except size.mm
+    cols = -size.name,                             # all columns except size.mm
     names_to = c("extract.type", ".value"),        # split names into type + variable
     names_pattern = "(.*)\\.(avg|sd)"              # regex to match "LB.avg", "TB.sd", etc.
+  ) %>%
+  mutate(
+    extract.type = factor(extract.type, levels = c("TB", "LB"))
   ) %>%
   rename(
     pnps.avg = avg,
     pnps.sd  = sd
-  )
+  ) 
 
 ggplot(data = eps_long, aes(x = size.name, y = pnps.avg, color = extract.type)) +
   geom_point(position = position_dodge(width = 0.2), size = 2) +
-  #geom_line(aes(group = extract.type)) +
   geom_errorbar(
     aes(ymin = pnps.avg - pnps.sd, ymax = pnps.avg + pnps.sd),
     width = 0.2,
     position = position_dodge(width = 0.2)
   ) +
-  scale_color_manual(values = met.brewer(taxa_pal, 2)) +
+  scale_color_manual(
+    values = met.brewer(taxa_pal, 2),
+    labels = c(
+      LB = "LB (p = 0.517)",
+      TB = "TB (p = 0.233)"
+    )
+  ) +
   labs(
     x = "Size",
     y = "Mean PN/PS",
