@@ -71,6 +71,12 @@ create_heatmap <- function(mat, rowname_w = NULL, col_title = NULL) {
   n_cols <- ncol(mat)
   n_rows <- nrow(mat)
   
+  # Labels
+  row_labels <- rownames(mat)
+  # italicize species + _g, but not _f/_o/_c/_p
+  italic_rows <- !grepl("_(f|o|c|p)(?:_|$|-)", row_labels)
+  row_fontface <- ifelse(italic_rows, "italic", "plain")
+  
   args <- list(
     mat,
     name = "log fold\nchange",
@@ -85,7 +91,7 @@ create_heatmap <- function(mat, rowname_w = NULL, col_title = NULL) {
     # size
     width  = unit(n_cols * cell_w, "inches"),
     height = unit(n_rows * cell_h, "inches"),
-    row_names_gp = gpar(fontsize = row_fontsize),
+    row_names_gp = gpar(fontsize = row_fontsize, fontface = row_fontface),
     column_names_gp = gpar(fontsize = col_fontsize)
   )
   # Only add row_names_max_width if it is not NULL
@@ -102,9 +108,9 @@ col_fun <- colorRamp2(c(min(fig_high), 0, max(fig_high)), c("blue", "white", "re
 
 lgd <- Legend(
   col_fun = col_fun,
-  title = "log fold\nchange",
+  title = "log fold change",
   direction = "horizontal",
-  title_position = "lefttop",
+  title_position = "topcenter",
   at = pretty(c(min(fig_high), max(fig_high))),
   labels = pretty(c(min(fig_high), max(fig_high)))
 )
@@ -125,9 +131,9 @@ col_fun2 <- colorRamp2(c(min(fig_low), 0, max(fig_low)), c("blue", "white", "red
 
 lgd2 <- Legend(
   col_fun = col_fun2,
-  title = "log fold\nchange",
+  title = "log fold change",
   direction = "horizontal",
-  title_position = "lefttop",
+  title_position = "topcenter",
   at = pretty(c(min(fig_low), max(fig_low))),
   labels = pretty(c(min(fig_low), max(fig_low)))
 )
@@ -136,7 +142,7 @@ lgd2 <- Legend(
 common_width <- ncol(fig_high) * cell_w + rowname_width_in + 2 # in
 png(fname_high, 
     width = common_width,
-    height = nrow(fig_high) * cell_h + 1.5,
+    height = nrow(fig_high) * cell_h + 2,
     units = "in", res = 300)
 draw(ht_high)
 draw(lgd, x = unit(0.41, "npc"), y = unit(0.99, "npc"), just = c("center", "top"))
@@ -144,7 +150,7 @@ dev.off()
 
 # png(fname_low,
 #     width = common_width,
-#     height = nrow(fig_low) * cell_h + 1,
+#     height = nrow(fig_low) * cell_h + 2,
 #     units = "in", res = 300)
 # draw(ht_low)
 # draw(lgd2, x = unit(0.41, "npc"), y = unit(0.99, "npc"), just = c("center", "top"))
