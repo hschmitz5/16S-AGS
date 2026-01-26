@@ -44,6 +44,7 @@ rel_wide <- get_rel_ASV(ps) %>%
     sig_taxa = ifelse(OTU %in% DA_taxa, "T", "F")
   )
 
+# agglomerate significant and insignificant taxa separately
 combine_names <- function(data) {
   data %>%
     mutate(
@@ -70,25 +71,40 @@ combine_names <- function(data) {
     select(OTU, sig_taxa, all_of(sam_name))
 }
 
+DA_taxa_renamed <- combine_names(rel_wide) %>%
+  filter(sig_taxa == "T") %>%
+  pull(OTU)
+
 pseudo <- 1e-6  # choose based on detection limit
 
+# take log of data
 data_mat <- combine_names(rel_wide) %>%
   select(-sig_taxa) %>%
   column_to_rownames("OTU") %>%
   as.matrix() %>%
   { log10(. + pseudo) }
 
-DA_taxa_renamed <- combine_names(rel_wide) %>%
-  filter(sig_taxa == "T") %>%
-  pull(OTU)
-
 # ---- Plotting
 n_cols <- ncol(data_mat)
 n_rows <- nrow(data_mat)
 split = rep(1:n_sizes, each = n_replicates)
 
-row_fontface <- ifelse(rownames(data_mat) %in% DA_taxa_renamed, "bold", "plain")
+# Labels
+row_labels <- rownames(data_mat)
 
+# italicize species + _g, but not _f/_o/_c/_p
+italic_rows <- !grepl("_(f|o|c|p)(?:_|$|-)", row_labels)
+
+# bold significant taxa
+bold_rows <- row_labels %in% DA_taxa_renamed
+
+row_fontface <- ifelse(
+  bold_rows & italic_rows, "bold.italic",
+  ifelse(bold_rows, "bold",
+         ifelse(italic_rows, "italic", "plain"))
+)
+
+# Colors
 ht_colors <- met.brewer(taxa_pal, type = "continuous")
 ha_colors <- met.brewer(size_pal, n_sizes)
 
@@ -100,7 +116,6 @@ ht <- Heatmap(
   data_mat,
   column_split = split,
   top_annotation = size_annot,
-  #name = "Rel Ab [Log(%)]",
   cluster_columns = FALSE,
   show_heatmap_legend = FALSE,
   show_row_names = TRUE,
@@ -120,9 +135,9 @@ lgd <- Legend(
     seq(min(data_mat), max(data_mat), length.out = length(ht_colors)),
     ht_colors
   ),
-  title = "Rel Ab [Log(%)]",
+  title = "Relative Abundance [Log(%)]",
   direction = "horizontal",
-  title_position = "lefttop",
+  title_position = "topcenter",
   at = pretty(c(min(data_mat), max(data_mat))),
   labels = pretty(c(min(data_mat), max(data_mat)))
 )
@@ -130,8 +145,8 @@ lgd <- Legend(
 # Draw combined heatmap
 png(fname_rel,
     width = 5.5,  # width in inches; can adjust
-    height = 9.5, # height in inches; can adjust
+    height = 10, # height in inches; can adjust
     units = "in", res = 300)
 draw(ht)
-draw(lgd, x = unit(0.41, "npc"), y = unit(0.99, "npc"), just = c("center", "top"))
+draw(lgd, x = unit(0.37, "npc"), y = unit(0.99, "npc"), just = c("center", "top"))
 dev.off()
