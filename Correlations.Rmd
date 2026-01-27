@@ -56,6 +56,25 @@ corr_mu_adj <- corr_mu %>%
   filter(p.adj < p_threshold)
 
 print(corr_mu_adj)
+
+
+
+# Correlation -- Mu and modulus yield same results
+corr_mod <- map_dfr(1:nrow(rel_bc), function(i) {
+  res <- cor.test(rel_bc[i, ], modulus$G1.avg, method = "spearman")
+  tibble(
+    OTU = rownames(rel_bc)[i],
+    # correlation coefficient (+ increasing, - decreasing)
+    estimate = res$estimate, 
+    p.value = res$p.value
+  ) 
+})
+
+corr_mod_adj <- corr_mod %>%
+  mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
+  filter(p.adj < p_threshold)
+
+print(corr_mod_adj)
 ```
 
 # Correlate Taxa with EPS
