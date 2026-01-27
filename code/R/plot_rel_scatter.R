@@ -7,6 +7,8 @@ source("./code/R/03_subset.R")
 # display top n most abundant genera
 n_display <- 5
 
+shapes <- c(16, 17, 15, 18, 3)
+
 fname <- "./figures/abund_size_scatter.png"
 
 # names of significant taxa
@@ -36,8 +38,6 @@ otu_labels <- ifelse(
 )
 
 names(otu_labels) <- otu_levels
-
-shapes <- c(16, 17, 15, 18, 3, 7)
 
 p <- ggplot(ASV_size, aes(x = Sample, y = Abundance, colour = OTU, shape = OTU)) +
   # group samples by size
