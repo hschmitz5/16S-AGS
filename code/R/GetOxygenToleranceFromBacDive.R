@@ -37,15 +37,15 @@ if (taxa_are_rows(df_genus)) otu <- t(otu)
 otu <- as.data.frame(otu)
 
 # Add genus names
-tax <- as.data.frame(tax_table(df_genus))
-colnames(otu) <- tax$Genus
+#tax <- as.data.frame(tax_table(df_genus))
+#colnames(otu) <- tax$Genus
 
 # ============================
 # 2. Metadata alignment
 # ============================
 # Align sample metadata with abundance table
 meta <- get_metadata(ps)
-otu$SampleID <- rownames(otu)
+otu$Sample <- rownames(otu)
 otu_meta <- left_join(otu, meta, by = "Sample")
 
 # ============================
@@ -53,58 +53,61 @@ otu_meta <- left_join(otu, meta, by = "Sample")
 # ============================
 # Summarize genera by group (segment) and compute abundance metrics
 
-groups <- unique(otu_meta$segment)
-
-summarize_group <- function(df, group_name) {
-  df_group <- df %>% filter(segment == group_name)
-  df_counts <- df_group %>%
-    select(-SampleID, -segment) %>%
-    mutate(across(everything(), as.numeric)) %>%
-    as.matrix()
-  total_counts <- colSums(df_counts, na.rm = TRUE)
-  avg_counts   <- colMeans(df_counts, na.rm = TRUE)
-  rel_abund <- sweep(df_counts, 1, rowSums(df_counts), "/")
-  avg_rel_abund <- colMeans(rel_abund, na.rm = TRUE)
-  tibble(
-    Genus = colnames(df_counts),
-    RawTotalCounts = as.numeric(total_counts),
-    AvgCountsPerSample = as.numeric(avg_counts),
-    AvgRelativeAbundance = as.numeric(avg_rel_abund)
-  )
-}
-
-genus_lists <- lapply(groups, function(g) {
-  summarize_group(otu_meta, g) %>%
-    arrange(desc(AvgRelativeAbundance)) %>%
-    pull(Genus)
-})
-names(genus_lists) <- groups
-
-# Union of all genera across lung groups
-lung_genera <- unique(unlist(genus_lists))
-
-message("=== Lung genera list constructed ===")
-message("Total lung genera: ", length(lung_genera))
+# groups <- unique(otu_meta$segment)
+# 
+# summarize_group <- function(df, group_name) {
+#   df_group <- df %>% filter(segment == group_name)
+#   df_counts <- df_group %>%
+#     select(-SampleID, -segment) %>%
+#     mutate(across(everything(), as.numeric)) %>%
+#     as.matrix()
+#   total_counts <- colSums(df_counts, na.rm = TRUE)
+#   avg_counts   <- colMeans(df_counts, na.rm = TRUE)
+#   rel_abund <- sweep(df_counts, 1, rowSums(df_counts), "/")
+#   avg_rel_abund <- colMeans(rel_abund, na.rm = TRUE)
+#   tibble(
+#     Genus = colnames(df_counts),
+#     RawTotalCounts = as.numeric(total_counts),
+#     AvgCountsPerSample = as.numeric(avg_counts),
+#     AvgRelativeAbundance = as.numeric(avg_rel_abund)
+#   )
+# }
+# 
+# genus_lists <- lapply(groups, function(g) {
+#   summarize_group(otu_meta, g) %>%
+#     arrange(desc(AvgRelativeAbundance)) %>%
+#     pull(Genus)
+# })
+# names(genus_lists) <- groups
+# 
+# # Union of all genera across lung groups
+# lung_genera <- unique(unlist(genus_lists))
+# 
+# message("=== Lung genera list constructed ===")
+# message("Total lung genera: ", length(lung_genera))
 
 # ============================
 # 4. BacDive oxygen tolerance pipeline
 # ============================
 # Query BacDive for oxygen tolerance information for each genus
 
-bd <- open_bacdive("your.email@domain.com", "your_password")
+bd <- open_bacdive("hannah.schmitz@northwestern.edu", "QP4,@,_nunfQEY6")
+#bd <- open_bacdive("your.email@domain.com", "your_password")
 
-extract_oxygen <- function(out) {
-  phys <- out[["Physiology and metabolism"]]
-  oxy  <- if (!is.null(phys)) phys[["oxygen tolerance"]] else NULL
-  if (is.null(oxy)) return(NA_character_)
-  if (is.list(oxy) && all(sapply(oxy, is.list))) {
+extract_gram_stain <- function(out) {
+  mor <- out[["Morphology"]]
+  gs  <- if (!is.null(mor)) mor[["Gram stain"]] else NULL
+  #phys <- out[["Physiology and metabolism"]]
+  #oxy  <- if (!is.null(phys)) phys[["oxygen tolerance"]] else NULL
+  if (is.null(gs)) return(NA_character_)
+  if (is.list(gs) && all(sapply(gs, is.list))) {
     vals <- vapply(
-      oxy,
-      function(x) if (!is.null(x[["oxygen tolerance"]])) x[["oxygen tolerance"]] else NA_character_,
+      gs,
+      function(x) if (!is.null(x[["Gram stain"]])) x[["Gram stain"]] else NA_character_,
       character(1)
     )
   } else {
-    vals <- oxy[["oxygen tolerance"]]
+    vals <- gs[["Gram stain"]]
   }
   vals <- vals[!is.na(vals)]
   if (length(vals) == 0) return(NA_character_)
@@ -113,7 +116,9 @@ extract_oxygen <- function(out) {
 
 master_summary <- tibble()
 
-for (g in lung_genera) {
+#for (g in lung_genera) {
+#for (g in otu) {
+g <- # I changed the names so it is confused
   message("=== Processing genus: ", g, " ===")
   
   recs <- try(retrieve(object = bd, query = g, search = "taxon"), silent = TRUE)
@@ -128,19 +133,19 @@ for (g in lung_genera) {
       Genus     = nm$genus,
       Species   = nm$species,
       BacDiveID = out[["General"]][["BacDive-ID"]],
-      Oxygen    = extract_oxygen(out)
+      Oxygen    = extract_gram_stain(out)
     )
   })
   
-  summary_tbl <- strain_tbl %>%
-    mutate(Oxygen = ifelse(is.na(Oxygen), "Unknown", Oxygen)) %>%
-    separate_rows(Oxygen, sep = ";\\s*") %>%
-    count(Genus, Oxygen, name = "StrainCount") %>%
-    pivot_wider(names_from = Oxygen, values_from = StrainCount, values_fill = 0) %>%
-    mutate(TotalStrains = rowSums(across(-Genus)))
-  
-  master_summary <- bind_rows(master_summary, summary_tbl)
-}
+  # summary_tbl <- strain_tbl %>%
+  #   mutate(Oxygen = ifelse(is.na(Oxygen), "Unknown", Oxygen)) %>%
+  #   separate_rows(Oxygen, sep = ";\\s*") %>%
+  #   count(Genus, Oxygen, name = "StrainCount") %>%
+  #   pivot_wider(names_from = Oxygen, values_from = StrainCount, values_fill = 0) %>%
+  #   mutate(TotalStrains = rowSums(across(-Genus)))
+  # 
+  # master_summary <- bind_rows(master_summary, summary_tbl)
+#}
 
 # ============================
 # 5. Final result
