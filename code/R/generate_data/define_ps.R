@@ -60,12 +60,15 @@ taxonomy <- as.data.frame(as.matrix(ps_filt@tax_table)) %>%
     }
   ) %>%
   ungroup() %>%
-  dplyr::select(-Species_tmp)
+  dplyr::select(-Species_tmp) %>%
+  column_to_rownames("OTU") %>%
+  as.matrix()
 
-# Apply names to ps
-rownames(ps_filt@otu_table) <- taxonomy$Species_updated
-rownames(ps_filt@tax_table) <- taxonomy$Species_updated
-ps_filt@phy_tree$tip.label <- taxonomy$Species_updated
+tax_table(ps_filt) <- tax_table(taxonomy)
+  
+# rownames(ps_filt@otu_table) <- taxonomy$Species_updated
+# rownames(ps_filt@tax_table) <- taxonomy$Species_updated
+# ps_filt@phy_tree$tip.label <- taxonomy$Species_updated
 
 # Save
 saveRDS(ps_filt, file = "./data/ps_ASV_full.rds")
