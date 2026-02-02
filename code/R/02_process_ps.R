@@ -1,8 +1,6 @@
 get_metadata <- function(ps){
   metadata <- as.data.frame(as.matrix(ps@sam_data)) %>%
-  rownames_to_column("Sample") %>%
-  mutate(size.mm = factor(size.mm, levels = size$ranges),
-         size.name = factor(size.name, levels = size$name))
+  rownames_to_column("Sample") 
 }
 
 get_taxonomy <- function(ps){
