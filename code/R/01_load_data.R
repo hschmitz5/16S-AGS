@@ -1,3 +1,6 @@
+#rm(list = ls())
+library(phyloseq)
+
 # Relative Abundance Cutoff (%) used to subset high abundance taxa
 rel_ab_cutoff <- 0.5
 # p-value used for filtering taxa (alpha)
@@ -16,6 +19,12 @@ mech_fname  <- "./data/EPS_moduli.xlsx"
 
 # absolute counts
 ps <- readRDS(ps_fname)
+
+# Change OTU to Species_updated
+taxonomy <- as.data.frame(as.matrix(ps@tax_table))
+rownames(ps@otu_table) <- taxonomy$Species_updated
+rownames(ps@tax_table) <- taxonomy$Species_updated
+ps@phy_tree$tip.label <- taxonomy$Species_updated
 
 # define sample names
 size <- data.frame(
