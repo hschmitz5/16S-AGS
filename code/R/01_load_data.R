@@ -27,14 +27,14 @@ rownames(ps@tax_table) <- taxonomy$Species_updated
 ps@phy_tree$tip.label <- taxonomy$Species_updated
 
 # define sample names
-size <- data.frame(
-  ranges = levels(ps@sam_data$size.mm),
-  name = levels(ps@sam_data$size.name)
-)
+# size <- data.frame(
+#   ranges = levels(ps@sam_data$size.mm),
+#   name = levels(ps@sam_data$size.name)
+# )
 
 # define dimensions of sample grouping
 n_replicates  <- 3
-n_sizes <- length(size$ranges)
+n_sizes <- length(levels(ps@sam_data$size.mm))
 
 # For ordering
 sam_name <- c("20A", "20B", "20C", "14A", "14B", "14C", "10A", "10B", "10C",
