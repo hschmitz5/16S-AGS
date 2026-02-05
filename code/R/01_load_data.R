@@ -26,12 +26,6 @@ rownames(ps@otu_table) <- taxonomy$Species_updated
 rownames(ps@tax_table) <- taxonomy$Species_updated
 ps@phy_tree$tip.label <- taxonomy$Species_updated
 
-# define sample names
-# size <- data.frame(
-#   ranges = levels(ps@sam_data$size.mm),
-#   name = levels(ps@sam_data$size.name)
-# )
-
 # define dimensions of sample grouping
 n_replicates  <- 3
 n_sizes <- length(levels(ps@sam_data$size.mm))
@@ -41,6 +35,12 @@ sam_name <- c("20A", "20B", "20C", "14A", "14B", "14C", "10A", "10B", "10C",
               "7A", "7B", "7C", "5A", "5B", "5C")
 # For correlation
 size_midpoint <- c(1.125, 1.7, 2.4, 3.4, 4.5)
+
+# define sample names
+size <- data.frame(
+  ranges = levels(ps@sam_data$size.mm),
+  name = levels(ps@sam_data$size.name)
+)
 
 # Other Data
 eps <- read_excel(mech_fname, range = cell_cols("A:E"))
