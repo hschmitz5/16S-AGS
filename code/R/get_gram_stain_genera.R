@@ -47,7 +47,7 @@ safe_retrieve <- function(g, max_tries = 3, wait = 2) {
   NULL
 }
 
-all_gram_df <- tibble()
+bd_gram_stain <- tibble()
 
 for (g in DA_genera) {
   
@@ -72,15 +72,15 @@ for (g in DA_genera) {
     )
   })
   
-  all_gram_df <- bind_rows(all_gram_df, gram_df)
+  bd_gram_stain <- bind_rows(bd_gram_stain, gram_df)
   Sys.sleep(1)
   
-  saveRDS(all_gram_df, fname_out_partial)
+  saveRDS(bd_gram_stain, fname_out_partial)
 }
 
-saveRDS(all_gram_df, fname_out_final)
+saveRDS(bd_gram_stain, fname_out_final)
 
-gram_counts <- all_gram_df %>%
+gram_counts <- bd_gram_stain %>%
   filter(!is.na(gram_stain)) %>%
   group_by(query, gram_stain) %>%
   summarise(n = n(), .groups = "drop")
