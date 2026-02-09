@@ -9,7 +9,7 @@ library(BacDive)
 library(purrr)
 
 fname_out_partial <- "./data/bd_gram_stain_partial.rds"
-fname_out_final   <- "./data/bd_gram_stain.rds"
+fname_out_final   <- "./data/bd_genera.rds"
 
 # Choose DA Taxa
 ancom_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel = FALSE)
