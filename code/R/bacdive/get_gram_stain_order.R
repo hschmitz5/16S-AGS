@@ -5,11 +5,11 @@ source("./code/R/01_load_data.R")
 source("./code/R/02_process_ps.R")
 source("./code/R/03_subset.R")
 library(BacDive)
-library(purrr)
 library(tibble)
 
 parent_fname <- "./data/Bacdive/"
-fname_out <- "./data/bd_family.rds"
+fname_out <- "./data/Bacdive/bd_order.rds"
+fname_out2 <- "./data/Bacdive/bd_order_summary.rds"
 
 # length of chunk
 L <- 100 
@@ -18,12 +18,12 @@ L <- 100
 ancom_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel = FALSE)
 DA_taxa <- ancom_taxa$high_ab 
 
-DA_family <- taxonomy %>%
+DA_order <- taxonomy %>%
   filter(Species_updated %in% DA_taxa) %>%
   mutate(
     g_suffix = if_else(
-      str_detect(Species_updated, "_f-[0-9]+$"),
-      str_replace(Species_updated, "_f-[0-9]+$", ""),
+      str_detect(Species_updated, "_o-[0-9]+$"),
+      str_replace(Species_updated, "_o-[0-9]+$", ""),
       NA_character_
     )
   ) %>%
@@ -34,14 +34,14 @@ DA_family <- taxonomy %>%
 #### Functions
 
 load_bd_csv <- function(taxon) {
-  fname <- paste0(parent_fname, taxon, "_f.csv")
+  fname <- paste0(parent_fname, taxon, "_o.csv")
   
   if (!file.exists(fname)) {
-    message("File not found for family: ", taxon, " — skipping")
+    message("File not found for order: ", taxon, " — skipping")
     return(NULL)  
   }
   
-  message("Processing family: ", taxon)
+  message("Processing order: ", taxon)
   
   # read in data
   df_raw <- read.csv(
@@ -50,9 +50,9 @@ load_bd_csv <- function(taxon) {
     stringsAsFactors = FALSE
   )
   
-  # filter only the current family
+  # filter only the current order
   df <- df_raw %>%
-    filter(family %in% taxon) %>%
+    filter(ordo %in% taxon) %>%
     arrange(ID)
   
   removed <- nrow(df_raw) - nrow(df)
@@ -82,12 +82,12 @@ safe_fetch <- function(id, max_tries = 5, wait = 2) {
 
 bd <- open_bacdive("hannah.schmitz@northwestern.edu", "QP4,@,_nunfQEY6")
 
-gs_list <- list()  # list to hold results per DA_family
+gs_list <- list()  # list to hold results per DA_order
 
-for (taxon in DA_family) {
+for (taxon in DA_order) {
   # load Bac Dive csv file
   df <- load_bd_csv(taxon)
-  if (is.null(df)) next  # skip to next family
+  if (is.null(df)) next  # skip to next order
   
   # df$ID will be broken into chunks
   total_strains <- length(df$ID)
@@ -147,12 +147,16 @@ for (taxon in DA_family) {
     stain = lapply(rows, `[[`, "stain")
   )
   
-  # Store results per family
+  # Store results per order
   gs_list[[taxon]] <- gs
-  message("Finished family: ", taxon, " — ", nrow(gs), " rows collected")
+  message("Finished order: ", taxon, " — ", nrow(gs), " rows collected")
 }
 
 saveRDS(gs_list, fname_out)
+
+#### Summarize data
+
+# 1) Summarize multiple references per strain
 
 # Summarize stain data
 summarize_strain <- function(stain_list) {
@@ -207,10 +211,10 @@ for (taxon in names(gs_list)) {
   gs_summary_list[[taxon]] <- gs_summary
 }
 
+# 2) Summarize each order
 
-
-family_summary <- data.frame(
-  family = character(),
+order_summary <- data.frame(
+  order = character(),
   majority_stain = character(),
   percentage = numeric(),
   stringsAsFactors = FALSE
@@ -226,10 +230,10 @@ for (taxon in names(gs_summary_list)) {
     na.omit()
   
   if (length(stains) == 0) {
-    family_summary <- rbind(
-      family_summary,
+    order_summary <- rbind(
+      order_summary,
       data.frame(
-        family = taxon,
+        order = taxon,
         majority_stain = NA,
         percentage = NA,
         stringsAsFactors = FALSE
@@ -242,10 +246,10 @@ for (taxon in names(gs_summary_list)) {
   majority <- names(tab)[which.max(tab)]
   percent <- max(tab) / sum(tab)
   
-  family_summary <- rbind(
-    family_summary,
+  order_summary <- rbind(
+    order_summary,
     data.frame(
-      family = taxon,
+      order = taxon,
       majority_stain = majority,
       percentage = percent,
       stringsAsFactors = FALSE
@@ -253,3 +257,4 @@ for (taxon in names(gs_summary_list)) {
   )
 }
 
+saveRDS(order_summary, fname_out2)
