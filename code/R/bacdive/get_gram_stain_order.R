@@ -7,9 +7,9 @@ source("./code/R/03_subset.R")
 library(BacDive)
 library(tibble)
 
-parent_fname <- "./data/Bacdive/"
-fname_out <- "./data/Bacdive/bd_order.rds"
-fname_out2 <- "./data/Bacdive/bd_order_summary.rds"
+parent_fname <- "./data/bacdive/"
+fname_out <- "./data/bacdive/bd_order.rds"
+fname_out2 <- "./data/bacdive/bd_order_summary.rds"
 
 # length of chunk
 L <- 100 

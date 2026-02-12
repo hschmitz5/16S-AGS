@@ -8,8 +8,8 @@ source("./code/R/03_subset.R")
 library(BacDive)
 library(purrr)
 
-fname_out   <- "./data/Bacdive/bd_genera.rds"
-fname_out2  <- "./data/Bacdive/bd_genera_summary.rds"
+fname_out   <- "./data/bacdive/bd_genera.rds"
+fname_out2  <- "./data/bacdive/bd_genera_summary.rds"
 
 # Choose DA Taxa
 ancom_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel = FALSE)

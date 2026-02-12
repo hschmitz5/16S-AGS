@@ -8,9 +8,9 @@ library(BacDive)
 library(purrr)
 library(tibble)
 
-parent_fname <- "./data/Bacdive/"
-fname_out <- "./data/Bacdive/bd_family.rds"
-fname_out2 <- "./data/Bacdive/bd_family_summary.rds"
+parent_fname <- "./data/bacdive/"
+fname_out <- "./data/bacdive/bd_family.rds"
+fname_out2 <- "./data/bacdive/bd_family_summary.rds"
 
 # length of chunk
 L <- 100 
