@@ -18,6 +18,8 @@ col_fontsize <- 11
 
 write2excel <- FALSE 
 
+corr_taxa <- c("Ardenticatenales_o-13", "Ca_Competibacter_g-75", "Lysobacter_g-3", "Terrimonas_g-8")
+  
 # Choose DA Taxa
 ancom_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel = FALSE)
 DA_taxa <- ancom_taxa$high_ab 
@@ -94,7 +96,7 @@ row_labels <- rownames(data_mat)
 # italicize species + _g, but not _f/_o/_c/_p
 italic_rows <- !grepl("_(f|o|c|p)(?:_|$|-)", row_labels)
 # bold significant taxa
-bold_rows <- row_labels %in% DA_taxa_renamed
+bold_rows <- row_labels %in% corr_taxa ## DA_taxa_renamed
 # Apply
 row_fontface <- ifelse(
   bold_rows & italic_rows, "bold.italic",
