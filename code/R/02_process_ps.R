@@ -1,7 +1,7 @@
-get_metadata <- function(ps, sam_name){
+get_metadata <- function(ps){
   metadata <- data.frame(sample_data(ps)) %>%
     tibble::rownames_to_column("Sample") %>%
-    dplyr::mutate(Sample = factor(Sample, levels = sam_name))
+    arrange(size.name)
 }
 
 get_taxonomy <- function(ps){
