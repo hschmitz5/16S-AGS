@@ -9,8 +9,8 @@ output:
     toc: yes
     toc_float: yes
 ---
-# Correlate Taxa with mu
-```{r corr_taxa_mu}
+# Correlate Taxa with modulus
+```{r corr_taxa_modulus}
 rm(list = ls())
 source("./code/R/00_setup.R")
 source("./code/R/01_load_data.R")
@@ -39,27 +39,6 @@ rel_bc <- get_bc_abund(ancom_fname) %>%
   column_to_rownames("OTU") %>%
   as.matrix()
 
-# Correlation
-corr_mu <- map_dfr(1:nrow(rel_bc), function(i) {
-  res <- cor.test(rel_bc[i, ], mu$mu, method = "spearman")
-  tibble(
-    OTU = rownames(rel_bc)[i],
-    # correlation coefficient (+ increasing, - decreasing)
-    estimate = res$estimate, 
-    p.value = res$p.value
-  ) 
-})
-
-# Adjust p-values for multiple comparisons
-corr_mu_adj <- corr_mu %>%
-  mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
-  filter(p.adj < p_threshold)
-
-print(corr_mu_adj)
-
-
-
-# Correlation -- Mu and modulus yield same results
 corr_mod <- map_dfr(1:nrow(rel_bc), function(i) {
   res <- cor.test(rel_bc[i, ], modulus$G1.avg, method = "spearman")
   tibble(
@@ -74,7 +53,7 @@ corr_mod_adj <- corr_mod %>%
   mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
   filter(p.adj < p_threshold)
 
-print(corr_mod_adj)
+print(corr_mod)
 ```
 
 # Correlate Taxa with EPS
@@ -112,19 +91,19 @@ print(corr_tb_adj)
 # print(corr_lb_adj)
 ```
 
-# Correlate mu and EPS and size
+# Correlate modulus and EPS and size
 ```{r corr}
-merged <- as.data.frame(mu) %>%
+merged <- as.data.frame(modulus) %>%
   left_join(eps, join_by(size.name)) %>%
   mutate(size.midpoint = size_midpoint)
 
 # Named list of variable pairs
 var_pairs <- list(
-  TB_mu = c("TB.avg", "mu"),
-  LB_mu = c("LB.avg", "mu"),
-  size_mu = c("size.midpoint", "mu"),
-  size_TB = c("size.midpoint", "TB.avg"),
-  size_LB = c("size.midpoint", "LB.avg")
+  TB_mod   = c("TB.avg", "G1.avg"),
+  LB_mod   = c("LB.avg", "G1.avg"),
+  size_mod = c("size.midpoint", "G1.avg"),
+  size_TB  = c("size.midpoint", "TB.avg"),
+  size_LB  = c("size.midpoint", "LB.avg")
 )
 
 # One-liner to get estimates and p-values
