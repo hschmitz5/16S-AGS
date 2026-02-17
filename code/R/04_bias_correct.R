@@ -2,7 +2,7 @@ get_bc_abund <- function(fname) {
   
   output <- readRDS(fname)
   
-  metadata <- get_metadata(ps)
+  metadata <- get_metadata(ps, sam_name)
   
   bc_long <- output$bias_correct_log_table %>%
     rownames_to_column("OTU") %>%
