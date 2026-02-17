@@ -21,7 +21,7 @@ mech_fname  <- "./data/EPS_moduli.xlsx"
 ps <- readRDS(ps_fname)
 
 # Change OTU to Species_updated
-taxonomy <- as.data.frame(as.matrix(ps@tax_table))
+taxonomy <- data.frame(tax_table(ps))
 rownames(ps@otu_table) <- taxonomy$Species_updated
 rownames(ps@tax_table) <- taxonomy$Species_updated
 ps@phy_tree$tip.label <- taxonomy$Species_updated
