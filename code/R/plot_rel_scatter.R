@@ -25,14 +25,6 @@ ASV_size <- get_rel_ASV(ps) %>%
   filter(OTU %in% sig_taxa$high_ab[1:n_display]) %>%
   mutate(OTU = factor(OTU, levels = sig_taxa$high_ab[1:n_display])) 
 
-# %>%
-#   filter(OTU %in% "Ca_Contendobacter_g-18") %>%
-#   group_by(size.name) %>%
-#   summarise(
-#     Avg_Abund = mean(Abundance),
-#     .groups = "drop"
-#   ) 
-
 # italicize some labels
 otu_levels <- levels(ASV_size$OTU)
 
