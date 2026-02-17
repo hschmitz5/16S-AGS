@@ -47,7 +47,8 @@ corr_mod <- map_dfr(1:nrow(rel_bc), function(i) {
     estimate = res$estimate, 
     p.value = res$p.value
   ) 
-})
+}) %>%
+  arrange(p.value)
 
 corr_mod_adj <- corr_mod %>%
   mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
@@ -66,7 +67,8 @@ corr_tb <- map_dfr(1:nrow(rel_bc), function(i) {
     estimate = res$estimate,
     p.value = res$p.value
   )
-})
+}) %>%
+  arrange(p.value)
 
 # Adjust p-values for multiple comparisons
 corr_tb_adj <- corr_tb %>%
@@ -109,7 +111,8 @@ var_pairs <- list(
 # One-liner to get estimates and p-values
 results <- map_dfr(var_pairs, ~ cor.test(merged[[.x[1]]], merged[[.x[2]]], method = "spearman") %>%
                      broom::tidy(), .id = "comparison") %>%
-  dplyr::select(comparison, estimate, p.value)
+  dplyr::select(comparison, estimate, p.value) %>%
+  arrange(p.value)
 
 # Adjust p-values for multiple comparisons
 results_adj <- results %>%
