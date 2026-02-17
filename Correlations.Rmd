@@ -54,7 +54,7 @@ corr_mod_adj <- corr_mod %>%
   mutate(p.adj = p.adjust(p.value, method = "BH")) %>%
   filter(p.adj < p_threshold)
 
-print(corr_mod)
+print(corr_mod_adj)
 ```
 
 # Correlate Taxa with EPS
@@ -76,21 +76,22 @@ corr_tb_adj <- corr_tb %>%
 
 print(corr_tb_adj)
 
-# corr_lb <- map_dfr(1:nrow(rel_bc), function(i) {
-#   res <- cor.test(rel_bc[i, ], eps$LB.avg, method = "spearman")
-#   tibble(
-#     OTU = rownames(rel_bc)[i],
-#     # correlation coefficient (+ increasing, - decreasing)
-#     estimate = res$estimate,
-#     p.value = res$p.value
-#   ) 
-# })
-# 
-# # Adjust p-values for multiple comparisons
-# corr_lb_adj <- corr_lb %>%
-#   mutate(p.adj = p.adjust(p.value, method = "BH")) 
-# 
-# print(corr_lb_adj)
+corr_lb <- map_dfr(1:nrow(rel_bc), function(i) {
+  res <- cor.test(rel_bc[i, ], eps$LB.avg, method = "spearman")
+  tibble(
+    OTU = rownames(rel_bc)[i],
+    # correlation coefficient (+ increasing, - decreasing)
+    estimate = res$estimate,
+    p.value = res$p.value
+  )
+}) %>%
+  arrange(p.value)
+
+# Adjust p-values for multiple comparisons
+corr_lb_adj <- corr_lb %>%
+  mutate(p.adj = p.adjust(p.value, method = "BH"))
+
+print(corr_lb_adj)
 ```
 
 # Correlate modulus and EPS and size
