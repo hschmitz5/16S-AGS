@@ -45,10 +45,7 @@ size <- data.frame(
 # Other Data
 eps <- read_excel(mech_fname, range = cell_cols("A:E"))
 eps$size.name = factor(eps$size.name, levels = size$name)
-mu <- read_excel(mech_fname, range = cell_cols("G:H"))
-mu$size.name = factor(mu$size.name, levels = size$name)
 
-modulus <- read_excel(mech_fname, range = cell_cols("K:N")) |>
+modulus <- read_excel(mech_fname, range = cell_cols("G:K")) |>
   as.data.frame()
-
-rownames(modulus) <- mu$size.name
+modulus$size.name = factor(modulus$size.name, levels = size$name)
