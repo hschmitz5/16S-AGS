@@ -1,12 +1,20 @@
 get_metadata <- function(ps){
-  metadata <- as.data.frame(as.matrix(ps@sam_data)) %>%
-  rownames_to_column("Sample") 
+  metadata <- data.frame(sample_data(ps)) %>%
+    tibble::rownames_to_column("Sample")
 }
 
 get_taxonomy <- function(ps){
-  taxonomy <- as.data.frame(as.matrix(ps@tax_table)) %>%
-  rownames_to_column("OTU") 
+  taxonomy <- data.frame(tax_table(ps)) %>%
+    tibble::rownames_to_column("OTU")
 }
+
+get_rel_ASV <- function(ps) {
+  # define relative abundance
+  ps_rel_ASV <- phyloseq::transform_sample_counts(ps, function(x) x*100/sum(x))
+  
+  phyloseq::psmelt(ps_rel_ASV)
+}
+
 
 # get_rel_genus <- function(ps) {
 #   metadata <- get_metadata(ps)
@@ -28,10 +36,3 @@ get_taxonomy <- function(ps){
 #   
 #   return(table_rel_long)
 # }
-
-get_rel_ASV <- function(ps) {
-  # define relative abundance
-  ps_rel_ASV <- phyloseq::transform_sample_counts(ps, function(x) x*100/sum(x))
-  
-  phyloseq::psmelt(ps_rel_ASV)
-}
