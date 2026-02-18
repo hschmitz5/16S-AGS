@@ -21,7 +21,7 @@ shapes <- c(16, 17, 15, 18, 3, 7)
 p <- plot_ordination(ps_full, ps.ord, type="samples", color="size.name", shape = "size.name") +
   scale_color_manual(values = cols) +
   scale_shape_manual(values = shapes) +
-  labs(title="PCoA (wunifrac)", color = "Size", shape = "Size") +
+  labs(title="PCoA (Weighted UniFrac)", color = "Size", shape = "Size") +
   theme_minimal(base_size = 12) +
   theme(
     plot.title = element_text(size = 12)
@@ -32,6 +32,7 @@ ordination_plot <- p
 ggsave(fname_ord, plot = ordination_plot, width = 5, height = 3, dpi = 300)
 
 
+#####
 
 # Add mu to ps
 ps@sam_data$mu <- mu$mu[ match(ps@sam_data$size.name, mu$size.name) ]
