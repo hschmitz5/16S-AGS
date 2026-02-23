@@ -1,0 +1,81 @@
+rm(list = ls())
+library(ggtext)
+source("./code/R/00_setup.R")
+source("./code/R/01_load_data.R")
+source("./code/R/02_process_ps.R")
+source("./code/R/03_subset.R")
+
+fname <- "./figures/g_test.png"
+
+corr_taxa <- c("Ardenticatenales_o-13", "Ca_Competibacter_g-75", "Lysobacter_g-3", "Terrimonas_g-8")
+
+# 4 taxa it corr_taxa
+n_display <- 4
+
+shapes <- c(16, 17, 15, 18)
+
+#### Size vs Modulus
+
+p1 <- ggplot(modulus, aes(x = size.name, y = G1.avg)) +
+  geom_point() + 
+  labs(
+    x = "Size",
+    y = "Storage Modulus [Pa] (f = 0.1 rad/s)"
+  ) +
+  theme_minimal(base_size = 10) 
+            
+#### Size vs Taxa that correlate to modulus by size
+       
+ASV_size <- get_rel_ASV(ps) %>%
+  dplyr::select(Sample, size.mm, size.name, OTU, Abundance) %>%
+  group_by(Sample, size.mm, size.name, OTU) %>%
+  summarise(
+    Abundance = sum(Abundance),
+    .groups = "drop"
+  ) %>%
+  filter(OTU %in% corr_taxa) %>%
+  mutate(OTU = factor(OTU, levels = corr_taxa))
+
+# italicize some labels
+otu_levels <- levels(ASV_size$OTU)
+
+italic_rows <- 
+  !grepl("_(f|o|c|p)(?:_|$|-)", otu_levels) 
+
+otu_labels <- ifelse(
+  italic_rows,
+  paste0("<i>", otu_levels, "</i>"),
+  otu_levels
+)
+
+p2 <- ggplot(ASV_size, aes(x = Sample, y = Abundance, colour = OTU, shape = OTU)) +
+  # group samples by size
+  facet_grid(. ~ size.name, scales = "free_x", space = "free_x", switch = "x") +
+  geom_point() + 
+  scale_colour_manual(
+    values = met.brewer(taxa_pal, n_display),
+    labels = otu_labels,
+    name = "ASV"
+  ) +
+  scale_shape_manual(
+    values = shapes,
+    labels = otu_labels,
+    name = "ASV"
+  ) +
+  labs(
+    x = "Size",
+    y = "Relative Abundance [%]"
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(
+    axis.text.x = element_blank(),    # hide sample labels
+    axis.ticks.x = element_blank(),
+    strip.placement = "outside",      # place strips below the panel
+    strip.text.x = element_text(size = 10, margin = margin(t = 5)),
+    legend.text = element_markdown()  # italicize labels
+  ) 
+
+combined_plot <- p1 + p2
+
+ggsave(fname, plot = combined_plot, width = 12, height = 4, dpi = 300)
+
