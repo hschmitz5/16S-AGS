@@ -28,9 +28,10 @@ p1 <- ggplot(modulus, aes(x = size.name, y = G1.avg)) +
        
 ASV_size <- get_rel_ASV(ps) %>%
   dplyr::select(Sample, size.mm, size.name, OTU, Abundance) %>%
-  group_by(Sample, size.mm, size.name, OTU) %>%
+  group_by(size.mm, size.name, OTU) %>%
   summarise(
-    Abundance = sum(Abundance),
+    mean_ab = mean(Abundance),
+    std_ab = sd(Abundance),
     .groups = "drop"
   ) %>%
   filter(OTU %in% corr_taxa) %>%
@@ -48,9 +49,9 @@ otu_labels <- ifelse(
   otu_levels
 )
 
-p2 <- ggplot(ASV_size, aes(x = Sample, y = Abundance, colour = OTU, shape = OTU)) +
-  # group samples by size
-  facet_grid(. ~ size.name, scales = "free_x", space = "free_x", switch = "x") +
+p2 <- ggplot(ASV_size, aes(x = size.name, y = mean_ab, colour = OTU, shape = OTU)) +
+  # # group samples by size
+  # facet_grid(. ~ size.name, scales = "free_x", space = "free_x", switch = "x") +
   geom_point() + 
   scale_colour_manual(
     values = met.brewer(taxa_pal, n_display),
@@ -66,14 +67,14 @@ p2 <- ggplot(ASV_size, aes(x = Sample, y = Abundance, colour = OTU, shape = OTU)
     x = "Size",
     y = "Relative Abundance [%]"
   ) +
-  theme_minimal(base_size = 10) +
-  theme(
-    axis.text.x = element_blank(),    # hide sample labels
-    axis.ticks.x = element_blank(),
-    strip.placement = "outside",      # place strips below the panel
-    strip.text.x = element_text(size = 10, margin = margin(t = 5)),
-    legend.text = element_markdown()  # italicize labels
-  ) 
+  theme_minimal(base_size = 10) #+
+  # theme(
+  #   axis.text.x = element_blank(),    # hide sample labels
+  #   axis.ticks.x = element_blank(),
+  #   strip.placement = "outside",      # place strips below the panel
+  #   strip.text.x = element_text(size = 10, margin = margin(t = 5)),
+  #   legend.text = element_markdown()  # italicize labels
+  # ) 
 
 combined_plot <- p1 + p2
 
