@@ -96,7 +96,7 @@ row_labels <- rownames(data_mat)
 # italicize species + _g, but not _f/_o/_c/_p
 italic_rows <- !grepl("_(f|o|c|p)(?:_|$|-)", row_labels)
 # bold significant taxa
-bold_rows <- row_labels %in% corr_taxa ## DA_taxa_renamed
+bold_rows <- row_labels %in% DA_taxa_renamed
 # Apply
 row_fontface <- ifelse(
   bold_rows & italic_rows, "bold.italic",
