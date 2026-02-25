@@ -17,18 +17,14 @@ row_fontsize <- 10
 col_fontsize <- 11
 
 write2excel <- FALSE 
-
-corr_taxa <- c("Ardenticatenales_o-13", "Ca_Competibacter_g-75", "Lysobacter_g-3", "Terrimonas_g-8")
   
 # Choose DA Taxa
 ancom_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel = FALSE)
 DA_taxa <- ancom_taxa$high_ab 
 
-# Common taxa (ANCOM & ALDEx)
-# DA_taxa2 <- get_common_taxa(ancom_fname, aldex_fname, p_threshold, effect_threshold)
-
 # -------- Define groups ---------
 
+# define taxa in which at least one sample has abundance > rel_ab_cutoff
 high_ab_taxa <- get_rel_ASV(ps) %>%
   filter(Abundance > rel_ab_cutoff) %>%
   distinct(OTU) %>%
@@ -49,6 +45,7 @@ rel_wide <- get_rel_ASV(ps) %>%
 # agglomerate significant and insignificant taxa separately
 combine_names <- function(data) {
   data %>%
+    # define name_prefix - just the core OTU name without "-#" at the end
     mutate(
       name_prefix = if_else(
         grepl("[0-9]$", OTU),       # last character is a number
@@ -56,13 +53,15 @@ combine_names <- function(data) {
         OTU                         # last character is a letter → keep full OTU
       )
     ) %>%
+    # sum relative abundance of groups with same name_prefix and sig_taxa
     group_by(sig_taxa, name_prefix) %>%
     summarise(
-      n = n(),
+      n = n(), # number of rows in group
       OTU_orig = first(OTU),  # only used when n = 1
       across(all_of(sam_name), \(x) sum(x, na.rm = TRUE)),
       .groups = "drop"
     ) %>%
+    # create new name
     mutate(
       OTU = if_else(
         n == 1,
@@ -73,18 +72,18 @@ combine_names <- function(data) {
     select(OTU, sig_taxa, all_of(sam_name))
 }
 
-DA_taxa_renamed <- combine_names(rel_wide) %>%
-  filter(sig_taxa == "T") %>%
-  pull(OTU)
-
 pseudo <- 1e-6  # choose based on detection limit
 
-# take log of data
+# Agglomerate data and re-name
 data_mat <- combine_names(rel_wide) %>%
   select(-sig_taxa) %>%
   column_to_rownames("OTU") %>%
   as.matrix() %>%
   { log10(. + pseudo) }
+
+DA_taxa_renamed <- combine_names(rel_wide) %>%
+  filter(sig_taxa == "T") %>%
+  pull(OTU)
 
 # ---- Plotting
 n_cols <- ncol(data_mat)
