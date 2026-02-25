@@ -5,7 +5,7 @@ source("./code/R/01_load_data.R")
 source("./code/R/02_process_ps.R")
 source("./code/R/03_subset.R")
 
-fname <- "./figures/g_test.png"
+fname <- "./figures/moduli_corr_taxa.png"
 
 corr_taxa <- c("Ardenticatenales_o-13", "Ca_Competibacter_g-75", "Lysobacter_g-3", "Terrimonas_g-8")
 
@@ -16,16 +16,15 @@ shapes <- c(16, 17, 15, 18)
 
 # Get relative abundance corresponding to corr_taxa
 ASV_size <- get_rel_ASV(ps) %>%
-  dplyr::select(Sample, size.mm, size.name, OTU, Abundance) %>%
+  filter(OTU %in% corr_taxa) %>%
+  mutate(OTU = factor(OTU, levels = corr_taxa)) %>%
   group_by(size.mm, size.name, OTU) %>%
   summarise(
     mean_ab = mean(Abundance),
     std_ab = sd(Abundance),
     .groups = "drop"
-  ) %>%
-  filter(OTU %in% corr_taxa) %>%
-  mutate(OTU = factor(OTU, levels = corr_taxa))
-
+  ) 
+  
 # italicize some labels
 otu_levels <- levels(ASV_size$OTU)
 
@@ -84,4 +83,3 @@ p2 <- ggplot(ASV_size, aes(x = size.name, y = mean_ab, colour = OTU, shape = OTU
 combined_plot <- p1 + p2
 
 ggsave(fname, plot = combined_plot, width = 12, height = 4, dpi = 300)
-
