@@ -14,18 +14,7 @@ n_display <- 4
 
 shapes <- c(16, 17, 15, 18)
 
-#### Size vs Modulus
-
-p1 <- ggplot(modulus, aes(x = size.name, y = G1.avg)) +
-  geom_point() + 
-  labs(
-    x = "Size",
-    y = "Storage Modulus [Pa] (f = 0.1 rad/s)"
-  ) +
-  theme_minimal(base_size = 10) 
-            
-#### Size vs Taxa that correlate to modulus by size
-       
+# Get relative abundance corresponding to corr_taxa
 ASV_size <- get_rel_ASV(ps) %>%
   dplyr::select(Sample, size.mm, size.name, OTU, Abundance) %>%
   group_by(size.mm, size.name, OTU) %>%
@@ -49,10 +38,29 @@ otu_labels <- ifelse(
   otu_levels
 )
 
+#### Size vs Modulus
+
+p1 <- ggplot(modulus, aes(x = size.name, y = G1.avg)) +
+  geom_point(size = 2) + 
+  geom_errorbar(
+    aes(ymin = G1.avg - G1.sd, ymax = G1.avg + G1.sd),
+    width = 0.1 
+  ) +
+  labs(
+    x = "Size",
+    y = "Storage Modulus [Pa] (f = 0.1 rad/s)"
+  ) +
+  theme_minimal(base_size = 10) 
+            
+#### Size vs Taxa that correlate to modulus by size
+       
 p2 <- ggplot(ASV_size, aes(x = size.name, y = mean_ab, colour = OTU, shape = OTU)) +
-  # # group samples by size
-  # facet_grid(. ~ size.name, scales = "free_x", space = "free_x", switch = "x") +
-  geom_point() + 
+  geom_point(position = position_dodge(width = 0.2), size = 2) + 
+  geom_errorbar(
+    aes(ymin = mean_ab - std_ab, ymax = mean_ab + std_ab),
+    width = 0.2,
+    position = position_dodge(width = 0.2)
+  ) +
   scale_colour_manual(
     values = met.brewer(taxa_pal, n_display),
     labels = otu_labels,
@@ -67,14 +75,11 @@ p2 <- ggplot(ASV_size, aes(x = size.name, y = mean_ab, colour = OTU, shape = OTU
     x = "Size",
     y = "Relative Abundance [%]"
   ) +
-  theme_minimal(base_size = 10) #+
-  # theme(
-  #   axis.text.x = element_blank(),    # hide sample labels
-  #   axis.ticks.x = element_blank(),
-  #   strip.placement = "outside",      # place strips below the panel
-  #   strip.text.x = element_text(size = 10, margin = margin(t = 5)),
-  #   legend.text = element_markdown()  # italicize labels
-  # ) 
+  theme_minimal(base_size = 10) +
+  theme(
+    legend.text = element_markdown()
+  )
+
 
 combined_plot <- p1 + p2
 
