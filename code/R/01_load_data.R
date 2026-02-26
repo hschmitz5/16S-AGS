@@ -46,6 +46,6 @@ size <- data.frame(
 eps <- read_excel(mech_fname, range = cell_cols("A:E"))
 eps$size.name = factor(eps$size.name, levels = size$name)
 
-modulus <- read_excel(mech_fname, range = cell_cols("G:K")) |>
+modulus <- read_excel(mech_fname, range = cell_cols("G:L")) |>
   as.data.frame()
 modulus$size.name = factor(modulus$size.name, levels = size$name)
