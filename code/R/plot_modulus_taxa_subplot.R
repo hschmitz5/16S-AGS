@@ -46,35 +46,17 @@ otu_labels <- ifelse(
 
 #### Size vs Modulus
 
-modulus$f_label <- factor(modulus$f, 
-                          levels = 0.1, 
-                          labels = "0.1 rad/s")
-
-p1 <- ggplot(modulus, aes(x = size.name, y = G1.avg, colour = f_label)) +
+p1 <- ggplot(modulus, aes(x = size.name, y = G1.avg)) +
   geom_point(size = 2) + 
   geom_errorbar(
     aes(ymin = G1.avg - G1.sd, ymax = G1.avg + G1.sd),
     width = 0.1 
   ) +
-  scale_colour_manual(
-    values = "black",
-    name = "Frequency"
-  ) +
   labs(
     x = "Size",
     y = "Storage Modulus [Pa]"
   ) +
-  theme_minimal(base_size = bs) +
-  theme(
-    legend.position = "top",
-    legend.justification = "left"
-  ) + 
-  guides(
-    color = guide_legend(
-      title.position = "top",
-      nrow = 2
-    )
-  ) 
+  theme_minimal(base_size = 12) 
             
 #### Size vs Taxa that correlate to modulus by size
        
@@ -99,19 +81,19 @@ p2 <- ggplot(ASV_size, aes(x = size.name, y = mean_ab, colour = OTU, shape = OTU
     x = "Size",
     y = "Relative Abundance [%]"
   ) +
-  theme_minimal(base_size = bs) +
+  theme_minimal(base_size = 12) +
   theme(
-    legend.position = "top",
+    legend.position = "right",
     legend.justification = "left",
     legend.text = element_markdown()
-  ) + 
-  guides(
-    color = guide_legend(
-      title.position = "top",
-      nrow = 2
-    )
-  ) 
+  ) #+ 
+  # guides(
+  #   color = guide_legend(
+  #     title.position = "top",
+  #     nrow = 1
+  #   )
+  # ) 
 
-combined_plot <- p1 + p2
+combined_plot <- p1 / p2
 
-ggsave(fname, plot = combined_plot, width = 8, height = 4, dpi = 300)
+ggsave(fname, plot = combined_plot, width = 6, height = 5, dpi = 300)
