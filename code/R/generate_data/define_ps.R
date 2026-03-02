@@ -42,12 +42,12 @@ taxonomy <- as.data.frame(as.matrix(ps_filt@tax_table)) %>%
   mutate(
     Species_tmp = case_when(
       is.na(Phylum) ~ paste0("Phylum_unknown"),
-      !is.na(Species) & !startsWith(Species, "midas") ~ Species,
-      !is.na(Genus)   & !startsWith(Genus, "midas")   ~ paste0(Genus, "_g"),
-      !is.na(Family)  & !startsWith(Family, "midas")  ~ paste0(Family, "_f"),
-      !is.na(Order)   & !startsWith(Order, "midas")   ~ paste0(Order, "_o"),
-      !is.na(Class)   & !startsWith(Class, "midas")   ~ paste0(Class, "_c"),
-      !is.na(Phylum)  & !startsWith(Phylum, "midas")  ~ paste0(Phylum, "_p"),
+      !is.na(Species) & !startsWith(Species, "midas") ~ paste0(Species, "_s"), 
+      !is.na(Genus)   & !startsWith(Genus, "midas")   ~ paste0(Genus,   "_g"),
+      !is.na(Family)  & !startsWith(Family, "midas")  ~ paste0(Family,  "_f"),
+      !is.na(Order)   & !startsWith(Order, "midas")   ~ paste0(Order,   "_o"),
+      !is.na(Class)   & !startsWith(Class, "midas")   ~ paste0(Class,   "_c"),
+      !is.na(Phylum)  & !startsWith(Phylum, "midas")  ~ paste0(Phylum,  "_p"),
       .default = Species 
     )
   ) %>%
