@@ -1,6 +1,12 @@
 #rm(list = ls())
 library(phyloseq)
 
+# File Names
+ps_fname    <- "./data/ps_ASV_subset.rds"
+ancom_fname <- "./data/ancombc2_ASV.rds"
+aldex_fname <- "./data/aldex_ASV.rds"
+mech_fname  <- "./data/EPS_moduli.xlsx"
+
 # Relative Abundance Cutoff (%) used to subset high abundance taxa
 rel_ab_cutoff <- 0.5
 # p-value used for filtering taxa (alpha)
@@ -11,11 +17,8 @@ effect_threshold <- 1 # used for ALDEx DA
 size_pal <- "Java"
 taxa_pal <- "Hiroshige" #"Hokusai2"
 
-# File Names
-ps_fname    <- "./data/ps_ASV_subset.rds"
-ancom_fname <- "./data/ancombc2_ASV.rds"
-aldex_fname <- "./data/aldex_ASV.rds"
-mech_fname  <- "./data/EPS_moduli.xlsx"
+# Plot dimensions
+bs <- 12 # base size
 
 # absolute counts
 ps <- readRDS(ps_fname)
