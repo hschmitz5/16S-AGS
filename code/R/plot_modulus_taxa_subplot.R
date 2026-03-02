@@ -65,7 +65,7 @@ p1 <- ggplot(modulus, aes(x = size.name, y = G1.avg, colour = f_label)) +
     x = "Size",
     y = "Storage Modulus [Pa]"
   ) +
-  theme_minimal(base_size = 10) +
+  theme_minimal(base_size = bs) +
   theme(
     legend.position = "top",
     legend.justification = "left"
@@ -100,7 +100,7 @@ p2 <- ggplot(ASV_size, aes(x = size.name, y = mean_ab, colour = OTU, shape = OTU
     x = "Size",
     y = "Relative Abundance [%]"
   ) +
-  theme_minimal(base_size = 10) +
+  theme_minimal(base_size = bs) +
   theme(
     legend.position = "top",
     legend.justification = "left",
@@ -115,4 +115,4 @@ p2 <- ggplot(ASV_size, aes(x = size.name, y = mean_ab, colour = OTU, shape = OTU
 
 combined_plot <- p1 + p2
 
-ggsave(fname, plot = combined_plot, width = 8, height = 3, dpi = 300)
+ggsave(fname, plot = combined_plot, width = 8, height = 4, dpi = 300)
