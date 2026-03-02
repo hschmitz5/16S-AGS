@@ -58,7 +58,7 @@ p1 <- ggplot(modulus, aes(x = size.name, y = G1.avg, colour = f_label)) +
     width = 0.1 
   ) +
   scale_colour_manual(
-    values = met.brewer(taxa_pal, n_display),
+    values = "black",
     name = "Frequency"
   ) +
   labs(
@@ -67,9 +67,15 @@ p1 <- ggplot(modulus, aes(x = size.name, y = G1.avg, colour = f_label)) +
   ) +
   theme_minimal(base_size = 10) +
   theme(
-    legend.position = "right",
+    legend.position = "top",
     legend.justification = "left"
-  )
+  ) + 
+  guides(
+    color = guide_legend(
+      title.position = "top",
+      nrow = 2
+    )
+  ) 
             
 #### Size vs Taxa that correlate to modulus by size
        
@@ -96,9 +102,17 @@ p2 <- ggplot(ASV_size, aes(x = size.name, y = mean_ab, colour = OTU, shape = OTU
   ) +
   theme_minimal(base_size = 10) +
   theme(
+    legend.position = "top",
+    legend.justification = "left",
     legend.text = element_markdown()
-  )
+  ) + 
+  guides(
+    color = guide_legend(
+      title.position = "top",
+      nrow = 2
+    )
+  ) 
 
-combined_plot <- p1 / p2
+combined_plot <- p1 + p2
 
-ggsave(fname, plot = combined_plot, width = 6, height = 6, dpi = 300)
+ggsave(fname, plot = combined_plot, width = 8, height = 3, dpi = 300)
