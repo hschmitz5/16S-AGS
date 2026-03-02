@@ -30,7 +30,7 @@ ASV_size <- get_rel_ASV(ps) %>%
 otu_levels <- levels(ASV_size$OTU)
 
 italic_rows <- 
-  !grepl("_(f|o|c|p)(?:_|$|-)", otu_levels) &
+  grepl("_(g|s)(?:_|$|-)", otu_levels) &
   otu_levels != "Other"
 
 otu_labels <- ifelse(

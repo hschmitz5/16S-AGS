@@ -50,7 +50,7 @@ n_display <- length(plot_taxa)
 otu_levels <- levels(ASV_size$OTU)
 
 italic_rows <- 
-  !grepl("_(f|o|c|p)(?:_|$|-)", otu_levels) 
+  italic_rows <- grepl("_(g|s)(?:_|$|-)", row_labels)
 
 otu_labels <- ifelse(
   italic_rows,
