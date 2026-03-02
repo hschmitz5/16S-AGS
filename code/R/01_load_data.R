@@ -17,9 +17,6 @@ effect_threshold <- 1 # used for ALDEx DA
 size_pal <- "Java"
 taxa_pal <- "Hiroshige" #"Hokusai2"
 
-# Plot dimensions
-bs <- 12 # base size
-
 # absolute counts
 ps <- readRDS(ps_fname)
 
