@@ -36,8 +36,7 @@ ASV_size <- ASV_size %>%
 # italicize some labels
 otu_levels <- levels(taxa_order)
 
-italic_rows <- 
-  !grepl("_(f|o|c|p)(?:_|$|-)", otu_levels) 
+italic_rows <- grepl("_(g|s)(?:_|$|-)", otu_levels)
 
 otu_labels <- ifelse(
   italic_rows,
