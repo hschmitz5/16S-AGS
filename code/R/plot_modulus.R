@@ -77,10 +77,10 @@ p2 <- ggplot(G2, aes(x = freq, y = avg, color = as.factor(size.name))) +
 p <- p1 + p2 + 
   plot_layout(guides = "collect") & 
   theme_minimal(base_size = 12) +
-  theme(legend.position = "top") &
+  theme(legend.position = "bottom") &
   guides(
     color = guide_legend(
-      title.position = "top",
+      title.position = "bottom",
       title.hjust = 0.5 # centers title
       )
   )
