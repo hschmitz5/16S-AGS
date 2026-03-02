@@ -21,7 +21,7 @@ shapes <- c(16, 17, 15, 18, 3, 7)
 p <- plot_ordination(ps_full, ps.ord, type="samples", color="size.name", shape = "size.name") +
   scale_color_manual(values = cols) +
   scale_shape_manual(values = shapes) +
-  labs(title="PCoA (Weighted UniFrac)", color = "Size", shape = "Size") +
+  labs(color = "Size", shape = "Size") +
   theme_minimal(base_size = 12) +
   theme(
     plot.title = element_text(size = 12)
