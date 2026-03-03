@@ -25,6 +25,7 @@ taxonomy <- data.frame(tax_table(ps))
 rownames(ps@otu_table) <- taxonomy$Species_updated
 rownames(ps@tax_table) <- taxonomy$Species_updated
 ps@phy_tree$tip.label <- taxonomy$Species_updated
+rm(taxonomy)
 
 # define dimensions of sample grouping
 n_replicates  <- 3
