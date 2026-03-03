@@ -39,7 +39,7 @@ rel_wide <- get_rel_ASV(ps) %>%
   ) %>%
   .[, c("OTU", sam_name)] %>%
   mutate(
-    sig_taxa = ifelse(OTU %in% DA_taxa, "T", "F")
+    DA = ifelse(OTU %in% DA_taxa, "T", "F")
   )
 
 # agglomerate significant and insignificant taxa separately
@@ -53,8 +53,8 @@ combine_names <- function(data) {
         OTU                         # last character is a letter → keep full OTU
       )
     ) %>%
-    # sum relative abundance of groups with same name_prefix and sig_taxa
-    group_by(sig_taxa, name_prefix) %>%
+    # sum relative abundance of groups with same name_prefix and DA
+    group_by(DA, name_prefix) %>%
     summarise(
       n = n(), # number of rows in group
       OTU_orig = first(OTU),  # only used when n = 1
@@ -66,23 +66,23 @@ combine_names <- function(data) {
       OTU = if_else(
         n == 1,
         OTU_orig,
-        paste0(name_prefix, "_", sig_taxa)
+        paste0(name_prefix, "_", DA)
       )
     ) %>%
-    select(OTU, sig_taxa, all_of(sam_name))
+    select(OTU, DA, all_of(sam_name))
 }
 
 pseudo <- 1e-6  # choose based on detection limit
 
 # Agglomerate data and re-name
 data_mat <- combine_names(rel_wide) %>%
-  select(-sig_taxa) %>%
+  select(-DA) %>%
   column_to_rownames("OTU") %>%
   as.matrix() %>%
   { log10(. + pseudo) }
 
 DA_taxa_renamed <- combine_names(rel_wide) %>%
-  filter(sig_taxa == "T") %>%
+  filter(DA == "T") %>%
   pull(OTU)
 
 # ---- Plotting
@@ -146,6 +146,9 @@ png(fname_rel,
     width = 5.5,  # width in inches; can adjust
     height = 10, # height in inches; can adjust
     units = "in", res = 300)
-draw(ht)
+draw(ht) 
 draw(lgd, x = unit(0.37, "npc"), y = unit(0.99, "npc"), just = c("center", "top"))
 dev.off()
+
+# Print to Excel
+taxa_names <- ht@row_names_param$labels
