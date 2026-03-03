@@ -85,4 +85,4 @@ p <- p1 + p2 +
       )
   )
 
-ggsave(fname_out, plot = p, width = 8, height = 3, dpi = 300)
+ggsave(fname_out, plot = p, width = 8, height = 3, dpi = 600)

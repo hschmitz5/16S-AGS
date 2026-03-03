@@ -96,4 +96,4 @@ p2 <- ggplot(ASV_size, aes(x = size.name, y = mean_ab, colour = OTU, shape = OTU
 
 combined_plot <- p1 / p2
 
-ggsave(fname, plot = combined_plot, width = 6, height = 5, dpi = 300)
+ggsave(fname, plot = combined_plot, width = 6, height = 5, dpi = 600)
