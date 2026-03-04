@@ -15,7 +15,7 @@ fname_out2  <- "./data/bacdive/bd_genera_summary.rds"
 ancom_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel = FALSE)
 DA_taxa <- ancom_taxa$high_ab 
 
-DA_genera <- taxonomy %>%
+DA_genera <- get_taxonomy(ps) %>%
   filter(Species_updated %in% DA_taxa) %>%
   mutate(
     g_suffix = if_else(

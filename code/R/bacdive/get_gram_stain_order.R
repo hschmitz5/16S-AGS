@@ -18,7 +18,7 @@ L <- 100
 ancom_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel = FALSE)
 DA_taxa <- ancom_taxa$high_ab 
 
-DA_order <- taxonomy %>%
+DA_order <- get_taxonomy(ps) %>%
   filter(Species_updated %in% DA_taxa) %>%
   mutate(
     g_suffix = if_else(
