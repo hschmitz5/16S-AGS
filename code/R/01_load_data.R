@@ -14,7 +14,7 @@ p_threshold   <- 0.05
 effect_threshold <- 1 # used for ALDEx DA
 
 # Color Palettes (MetBrewer)
-size_pal <- "Java"
+size_pal <- "Greek" #Veronese" #Java"
 taxa_pal <- "Hiroshige" #"Hokusai2"
 
 # absolute counts
