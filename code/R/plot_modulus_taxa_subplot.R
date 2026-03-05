@@ -5,7 +5,10 @@ source("./code/R/01_load_data.R")
 source("./code/R/02_process_ps.R")
 source("./code/R/03_subset.R")
 
-fname <- "./figures/moduli_corr_taxa.png"
+fname_p4 <- "./figures/moduli_corr_taxa.png"
+
+bs <- 12 # base size
+ar <- 0.7 # aspect ratio
 
 corr_taxa <- c("Ardenticatenales_o-13", "Ca_Competibacter_g-75", "Lysobacter_g-3", "Terrimonas_g-8")
 
@@ -56,7 +59,8 @@ p1 <- ggplot(modulus, aes(x = size.name, y = G1.avg)) +
     x = "Size",
     y = "Storage Modulus [Pa]"
   ) +
-  theme_minimal(base_size = 12) 
+  theme_minimal(base_size = bs) +
+  theme(aspect.ratio = ar)
             
 #### Size vs Taxa that correlate to modulus by size
        
@@ -81,19 +85,76 @@ p2 <- ggplot(ASV_size, aes(x = size.name, y = mean_ab, colour = OTU, shape = OTU
     x = "Size",
     y = "Relative Abundance [%]"
   ) +
-  theme_minimal(base_size = 12) +
+  theme_minimal(base_size = bs) +
   theme(
     legend.position = "right",
     legend.justification = "left",
+    aspect.ratio = ar,
     legend.text = element_markdown()
-  ) #+ 
-  # guides(
-  #   color = guide_legend(
-  #     title.position = "top",
-  #     nrow = 1
-  #   )
-  # ) 
+  ) 
 
-combined_plot <- p1 / p2
+# PN/PS
+source("./code/R/plot_pnps.R")
 
-ggsave(fname, plot = combined_plot, width = 6, height = 5, dpi = 600)
+p3 <- ggplot(data = eps_long, aes(x = size.name, y = pnps.avg, color = extract.type)) +
+  geom_point(position = position_dodge(width = 0.2), size = 2) +
+  geom_errorbar(
+    aes(ymin = pnps.avg - pnps.sd, ymax = pnps.avg + pnps.sd),
+    width = 0.2,
+    position = position_dodge(width = 0.2)
+  ) +
+  scale_color_manual(
+    values = met.brewer(taxa_pal, 2),
+    labels = c(
+      LB = "LB (p.adj = 0.517)",
+      TB = "TB (p.adj = 0.389)"
+    )
+  ) +
+  labs(
+    x = "Size",
+    y = "Mean PN/PS",
+    color = "Extract Type"
+  ) +
+  theme_minimal(base_size = bs) +
+  theme(
+    legend.position = "right",
+    legend.justification = "left",
+    aspect.ratio = ar
+  ) 
+
+# rel scatter
+source("./code/R/plot_rel_scatter.R")
+
+p4 <- ggplot(ASV_size, aes(x = size.name, y = mean_ab, colour = OTU, shape = OTU)) +
+  geom_point(position = position_dodge(width = 0.2), size = 2) + 
+  geom_errorbar(
+    aes(ymin = mean_ab - std_ab, ymax = mean_ab + std_ab),
+    width = 0.2,
+    position = position_dodge(width = 0.2)
+  ) +
+  scale_colour_manual(
+    values = met.brewer(taxa_pal, n_display),
+    labels = otu_labels,
+    name = "ASV"
+  ) +
+  scale_shape_manual(
+    values = shapes,
+    labels = otu_labels,
+    name = "ASV"
+  ) +
+  labs(
+    x = "Size",
+    y = "Relative Abundance [%]"
+  ) +
+  theme_minimal(base_size = bs) +
+  theme(
+    legend.position = "right",
+    legend.justification = "left",
+    aspect.ratio = ar,
+    legend.text = element_markdown()
+  ) 
+
+combined_plot <- p1 / p2 / p3 / p4
+
+ggsave(fname_p4, plot = combined_plot, width = 6, height = 10, dpi = 600)
+
