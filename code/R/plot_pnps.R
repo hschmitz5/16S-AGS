@@ -1,4 +1,4 @@
-rm(list = ls())
+#rm(list = ls())
 
 library(readxl)
 library(tidyverse)
@@ -46,8 +46,8 @@ ggplot(data = eps_long, aes(x = size.name, y = pnps.avg, color = extract.type)) 
   scale_color_manual(
     values = met.brewer(taxa_pal, 2),
     labels = c(
-      LB = "LB (q = 0.517)",
-      TB = "TB (q = 0.389)"
+      LB = "LB (p.adj = 0.517)",
+      TB = "TB (p.adj = 0.389)"
     )
   ) +
   labs(
@@ -55,6 +55,7 @@ ggplot(data = eps_long, aes(x = size.name, y = pnps.avg, color = extract.type)) 
     y = "Mean PN/PS",
     color = "Extract Type"
   ) +
-  theme_minimal(base_size = 10)
+  theme_minimal(base_size = 12) +
+  theme(aspect.ratio = 0.7)
 
-ggsave(fname_out, height = 2, width = 4, dpi = 300)
+ggsave(fname_out, height = 2.5, width = 6, dpi = 600)
