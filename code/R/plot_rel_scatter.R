@@ -1,4 +1,4 @@
-rm(list = ls())
+#rm(list = ls())
 library(ggtext)
 source("./code/R/00_setup.R")
 source("./code/R/01_load_data.R")
@@ -50,7 +50,7 @@ n_display <- length(plot_taxa)
 otu_levels <- levels(ASV_size$OTU)
 
 italic_rows <- 
-  italic_rows <- grepl("_(g|s)(?:_|$|-)", row_labels)
+  italic_rows <- grepl("_(g|s)(?:_|$|-)", otu_levels)
 
 otu_labels <- ifelse(
   italic_rows,
