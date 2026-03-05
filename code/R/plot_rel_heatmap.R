@@ -17,7 +17,7 @@ row_fontsize <- 10
 col_fontsize <- 11
 
 write2excel <- FALSE 
-  
+
 # Choose DA Taxa
 ancom_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel = FALSE)
 DA_taxa <- ancom_taxa$high_ab 
@@ -85,6 +85,15 @@ DA_taxa_renamed <- combine_names(rel_wide) %>%
   filter(DA == "T") %>%
   pull(OTU)
 
+# Metabolism
+fname <- "./data/metabolism_midas.xlsx"
+m <- read_excel(fname, range = cell_cols("B:E")) # tibble
+m[is.na(m)] <- "NA" # replace na with "NA"
+# Convert to base data.frame
+m_df <- as.data.frame(m)
+rownames(m_df) <- m_df$row_label
+m_df$row_label <- NULL
+
 # ---- Plotting
 n_cols <- ncol(data_mat)
 n_rows <- nrow(data_mat)
@@ -105,18 +114,40 @@ row_fontface <- ifelse(
 
 # Colors
 ht_colors <- met.brewer(taxa_pal, type = "continuous")
-ha_colors <- met.brewer(size_pal, n_sizes)
+sz_colors <- met.brewer(size_pal, n_sizes)
+m_colors  <- c("P" = "#66C24A", "V" = "#EAEC3F","N" = "#FF0000", "NA" = "#B6B6B6") 
 
-size_annot <- HeatmapAnnotation(sz = anno_block(gp = gpar(fill = ha_colors),
+# Size Annotation
+size_annot <- HeatmapAnnotation(sz = anno_block(gp = gpar(fill = sz_colors),
                                                 labels = size$name,
                                                 labels_gp = gpar(col = "white", fontsize = col_fontsize)))
+# Metabolism Annotation
+m_annot <- rowAnnotation(
+  df = m_df,
+  col = col_list <- setNames(
+    rep(list(m_colors), ncol(m_df)),
+    colnames(m_df)
+  ),
+  show_legend = c(TRUE, FALSE, FALSE),  # Only first column contributes
+  annotation_legend_param = list(
+    title = "Metabolism\n& Cell Properties",
+    at = c("P", "V", "N", "NA"),
+    labels = c("Positive", "Variable", "Negative", "Not Assessed"),
+    nrow = 2
+  )
+)
 
 ht <- Heatmap(
   data_mat,
-  column_split = split,
-  top_annotation = size_annot,
+  bottom_annotation = size_annot,
+  right_annotation = m_annot, 
+  heatmap_legend_param = list(
+    title = "Relative Abundance      \n[Log(%)]",
+    direction = "horizontal"
+  ),
+  column_split = split, # put a gap between sizes
   cluster_columns = FALSE,
-  show_heatmap_legend = FALSE,
+  show_heatmap_legend = TRUE, 
   show_row_names = TRUE,
   show_column_names = FALSE,
   column_names_rot = 0,
@@ -129,26 +160,23 @@ ht <- Heatmap(
   column_names_gp = gpar(fontsize = col_fontsize)
 )
 
-lgd <- Legend(
-  col_fun = colorRamp2(
-    seq(min(data_mat), max(data_mat), length.out = length(ht_colors)),
-    ht_colors
-  ),
-  title = "Relative Abundance [Log(%)]",
-  direction = "horizontal",
-  title_position = "topcenter",
-  at = pretty(c(min(data_mat), max(data_mat))),
-  labels = pretty(c(min(data_mat), max(data_mat)))
-)
+# lgd <- Legend(
+#   col_fun = colorRamp2(
+#     seq(min(data_mat), max(data_mat), length.out = length(ht_colors)),
+#     ht_colors
+#   ),
+#   title = "Relative Abundance [Log(%)]",
+#   direction = "horizontal",
+#   title_position = "topcenter",
+#   at = pretty(c(min(data_mat), max(data_mat))),
+#   labels = pretty(c(min(data_mat), max(data_mat)))
+# )
 
 # Draw combined heatmap
 png(fname_rel,
-    width = 5.5,  # width in inches; can adjust
-    height = 10, # height in inches; can adjust
+    width = 8,  # width in inches; can adjust
+    height = 10.5, # height in inches; can adjust
     units = "in", res = 300)
-draw(ht) 
-draw(lgd, x = unit(0.37, "npc"), y = unit(0.99, "npc"), just = c("center", "top"))
+draw(ht, heatmap_legend_side = "top", annotation_legend_side = "top") 
+#draw(lgd, x = unit(0.37, "npc"), y = unit(0.99, "npc"), just = c("center", "top"))
 dev.off()
-
-# Print to Excel
-taxa_names <- ht@row_names_param$labels
