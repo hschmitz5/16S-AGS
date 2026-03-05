@@ -131,6 +131,7 @@ m_annot <- rowAnnotation(
   show_legend = c(TRUE, FALSE, FALSE),  # Only first column contributes
   annotation_legend_param = list(
     title = "Metabolism\n& Cell Properties",
+    title_position = "topcenter",
     at = c("P", "V", "N", "NA"),
     labels = c("Positive", "Variable", "Negative", "Not Assessed"),
     nrow = 2
@@ -142,8 +143,9 @@ ht <- Heatmap(
   bottom_annotation = size_annot,
   right_annotation = m_annot, 
   heatmap_legend_param = list(
-    title = "Relative Abundance      \n[Log(%)]",
-    direction = "horizontal"
+    title = "Relative Abundance\n[Log(%)]",
+    direction = "horizontal",
+    title_position = "topcenter"
   ),
   column_split = split, # put a gap between sizes
   cluster_columns = FALSE,
