@@ -18,13 +18,13 @@ ancom_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2
 DA_taxa <- ancom_taxa$high_ab 
 
 taxonomy <- get_taxonomy(ps) %>%
+  rename(ASV_name = Species_updated) %>%
   filter(OTU %in% high_ab_taxa) %>%
   mutate(
     DA = ifelse(OTU %in% DA_taxa, "T", "F")
   ) %>%
-  arrange(desc(DA)) %>%
+  arrange(desc(DA), ASV_name) %>%
   select(-OTU, -Kingdom, -Class, -Phylum) %>%
-  select(rev(names(.))) %>%
-  rename(ASV_name = Species_updated)
-
+  select(rev(names(.))) 
+  
 write_xlsx(taxonomy, path = fname_out)
