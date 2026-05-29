@@ -2,10 +2,11 @@
 library(phyloseq)
 
 # File Names
-ps_fname    <- "./data/ps_ASV_subset.rds"
-ancom_fname <- "./data/ancombc2_ASV.rds"
-aldex_fname <- "./data/aldex_ASV.rds"
-mech_fname  <- "./data/EPS_moduli.xlsx"
+ps_fname         <- "./data/ps_ASV_subset.rds"
+ancom_fname      <- "./data/ancombc2_ASV.rds"
+aldex_fname      <- "./data/aldex_ASV.rds"
+#eps_fname        <- "./data/EPS/EPS_absorbance.xlsx"
+rheometry_fname  <- "./data/Rheometry_Nov_2024.xlsx"
 
 # Relative Abundance Cutoff (%) used to subset high abundance taxa
 rel_ab_cutoff <- 0.5
@@ -44,9 +45,11 @@ size <- data.frame(
 )
 
 # Other Data
-eps <- read_excel(mech_fname, range = cell_cols("A:E"))
-eps$size.name = factor(eps$size.name, levels = size$name)
+# eps <- read_excel(eps_fname, range = cell_cols("A:E"))
+# eps$size.name = factor(eps$size.name, levels = size$name)
 
-modulus <- read_excel(mech_fname, range = cell_cols("G:L")) |>
+modulus <- read_excel(rheometry_fname, sheet = "input", skip = 1) %>%
+  filter(size != "XS") |>
   as.data.frame()
-modulus$size.name = factor(modulus$size.name, levels = size$name)
+
+modulus$size = factor(modulus$size, levels = size$name)

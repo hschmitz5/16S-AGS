@@ -6,7 +6,7 @@ library(tidyverse)
 library(patchwork)
 library(MetBrewer)
 
-fname_in  <- "./data/Bio Granules Nov 2024.xlsx"
+fname_in  <- "./data/Rheometry_Nov_2024.xlsx"
 fname_out <- "./figures/moduli.png"
 
 # define sample names
@@ -14,37 +14,17 @@ size <- data.frame(
   name = c("S", "M", "L", "XL", "XXL")
 )
 
-read_loss <- function(sheet) {
-  # read + reshape avg
-  avg <- read_excel(fname_in, sheet = sheet, range = cell_cols("A:F")) %>%
-    rename(freq = `Frequency (rad/s)`) %>%
-    pivot_longer(!freq, names_to = "size.name", values_to = "avg")
-  
-  # read + reshape sd
-  sd <- read_excel(fname_in, sheet = sheet, range = cell_cols("H:M")) %>%
-    rename(freq = `Frequency (rad/s)`) %>%
-    pivot_longer(!freq, names_to = "size.name", values_to = "sd")
-  
-  # combine + clean up
-  avg %>%
-    left_join(sd, join_by(freq, size.name)) %>%
-    mutate(size.name = factor(size.name, levels = size$name))
-}
-
-G1 <- read_loss("G1")
-G2 <- read_loss("G2")
-
 #### Plot
 
-p1 <- ggplot(G1, aes(x = freq, y = avg, color = as.factor(size.name))) +
+p1 <- ggplot(modulus, aes(x = freq_rad, y = G_avg, color = size)) +
   geom_point() +
-  geom_line(aes(group = size.name)) +
+  geom_line(aes(group = size)) +
   geom_errorbar(
-    aes(ymin = pmax(avg - sd, 0), ymax = avg + sd),
+    aes(ymin = pmax(G_avg - G_sd, 0), ymax = G_avg + G_sd),
     width = 0.2
   ) +
   scale_color_manual(
-    name = "Size (p = 0.0167)",
+    name = "Size", 
     values = met.brewer(size_pal, n_sizes)
   ) +
   labs(
@@ -52,15 +32,15 @@ p1 <- ggplot(G1, aes(x = freq, y = avg, color = as.factor(size.name))) +
     y = "Storage Modulus [Pa]",
   ) 
 
-p2 <- ggplot(G2, aes(x = freq, y = avg, color = as.factor(size.name))) +
+p2 <- ggplot(modulus, aes(x = freq_rad, y = G2_avg, color = size)) +
   geom_point() +
-  geom_line(aes(group = size.name)) +
+  geom_line(aes(group = size)) +
   geom_errorbar(
-    aes(ymin = pmax(avg - sd, 0), ymax = avg + sd),
+    aes(ymin = pmax(G2_avg - G2_sd, 0), ymax = G2_avg + G2_sd),
     width = 0.2
   ) +
   scale_color_manual(
-    name = "Size (p = 0.0167)",
+    name = "Size",
     values = met.brewer(size_pal, n_sizes)
   ) +
   labs(
@@ -68,10 +48,6 @@ p2 <- ggplot(G2, aes(x = freq, y = avg, color = as.factor(size.name))) +
     y = "Loss Modulus [Pa]",
   ) 
 
-
-# vertical
-# p <- p1 / p2 + plot_layout(guides = "collect") &
-#   theme(legend.position = "right")
 
 # horizontal
 p <- p1 + p2 + 
