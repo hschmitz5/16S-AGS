@@ -18,6 +18,15 @@ col_fontsize <- 11
 
 write2excel <- FALSE 
 
+# Metabolism
+fname <- "./data/metabolism_midas_v2.xlsx"
+m <- read_excel(fname, range = cell_cols("B:F")) # tibble
+m[is.na(m)] <- "NA" # replace na with "NA"
+# Convert to base data.frame
+m_df <- as.data.frame(m)
+rownames(m_df) <- m_df$row_label
+m_df$row_label <- NULL
+
 # Choose DA Taxa
 ancom_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel = FALSE)
 DA_taxa <- ancom_taxa$high_ab 
@@ -85,15 +94,6 @@ DA_taxa_renamed <- combine_names(rel_wide) %>%
   filter(DA == "T") %>%
   pull(OTU)
 
-# Metabolism
-fname <- "./data/metabolism_midas.xlsx"
-m <- read_excel(fname, range = cell_cols("B:E")) # tibble
-m[is.na(m)] <- "NA" # replace na with "NA"
-# Convert to base data.frame
-m_df <- as.data.frame(m)
-rownames(m_df) <- m_df$row_label
-m_df$row_label <- NULL
-
 # ---- Plotting
 n_cols <- ncol(data_mat)
 n_rows <- nrow(data_mat)
@@ -112,15 +112,30 @@ row_fontface <- ifelse(
          ifelse(italic_rows, "italic", "plain"))
 )
 
-# Colors
+## Colors
+# Relative Abundance
 ht_colors <- met.brewer(taxa_pal, type = "continuous")
-sz_colors <- met.brewer(size_pal, n_sizes)
-m_colors  <- c("P" = "#66C24A", "V" = "#EAEC3F","N" = "#FF0000", "NA" = "#B6B6B6") 
+# Size
+sz_colors <- c(rep("lightgray", n_sizes)) # met.brewer(size_pal, n_sizes)
+# Metabolism
+m_colors  <- c("P" = "#66C24A", "V" = "#EAEC3F", "NA" = NA) 
+# m_colors  <- c("P" = "#66C24A", "V" = "#EAEC3F","N" = "lightgray", "NA" = "#B6B6B6") 
 
 # Size Annotation
-size_annot <- HeatmapAnnotation(sz = anno_block(gp = gpar(fill = sz_colors),
-                                                labels = size$name,
-                                                labels_gp = gpar(col = "white", fontsize = col_fontsize)))
+size_annot <- HeatmapAnnotation(
+  sz = anno_block(
+    gp = gpar(
+      fill = sz_colors,
+      col = NA # removes border
+    ),
+    labels = size$name,
+    labels_gp = gpar(
+      col = c(rep("black", n_sizes)), 
+      fontsize = col_fontsize
+    )
+  )
+)
+
 # Metabolism Annotation
 m_annot <- rowAnnotation(
   df = m_df,
@@ -128,13 +143,15 @@ m_annot <- rowAnnotation(
     rep(list(m_colors), ncol(m_df)),
     colnames(m_df)
   ),
-  show_legend = c(TRUE, FALSE, FALSE),  # Only first column contributes
+  show_legend = c(TRUE, c(rep(FALSE, length(m_df)-1))),  # Only first column contributes
   annotation_legend_param = list(
     title = "Metabolism\n& Cell Properties",
     title_position = "topcenter",
-    at = c("P", "V", "N", "NA"),
-    labels = c("Positive", "Variable", "Negative", "Not Assessed"),
-    nrow = 2
+    at = c("P", "V"),
+    labels = c("Positive", "Variable"),
+    # at = c("P", "V", "N", "NA"),
+    # labels = c("Positive", "Variable", "Negative", "Not Assessed"),
+    nrow = 1
   )
 )
 
@@ -162,23 +179,10 @@ ht <- Heatmap(
   column_names_gp = gpar(fontsize = col_fontsize)
 )
 
-# lgd <- Legend(
-#   col_fun = colorRamp2(
-#     seq(min(data_mat), max(data_mat), length.out = length(ht_colors)),
-#     ht_colors
-#   ),
-#   title = "Relative Abundance [Log(%)]",
-#   direction = "horizontal",
-#   title_position = "topcenter",
-#   at = pretty(c(min(data_mat), max(data_mat))),
-#   labels = pretty(c(min(data_mat), max(data_mat)))
-# )
-
 # Draw combined heatmap
 png(fname_rel,
     width = 8,  # width in inches; can adjust
     height = 10.5, # height in inches; can adjust
     units = "in", res = 300)
 draw(ht, heatmap_legend_side = "top", annotation_legend_side = "top") 
-#draw(lgd, x = unit(0.37, "npc"), y = unit(0.99, "npc"), just = c("center", "top"))
 dev.off()
