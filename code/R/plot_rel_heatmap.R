@@ -2,10 +2,15 @@ rm(list = ls())
 source("./code/R/00_setup.R")
 source("./code/R/01_load_data.R")
 source("./code/R/02_process_ps.R")
-source("./code/R/03_subset.R")
+source("./code/R/03_diff_ab.R")
+source("./code/R/04_DA_agglom.R")
 library(ComplexHeatmap)
 library(circlize)
 
+# Metabolism input file
+metab_fname <- "./data/metabolism_midas.xlsx"
+
+# Figure output location
 fname_rel <- "./figures/rel_ab_heatmap.png"
 
 # Cell height in inches (adjust as needed)
@@ -16,83 +21,27 @@ cell_w <- 0.2
 row_fontsize <- 10
 col_fontsize <- 11
 
-write2excel <- FALSE 
+# Pseudo count to add when converting to log
+# (choose based on detection limit)
+pseudo <- 1e-6  
 
-# Metabolism
-fname <- "./data/metabolism_midas_v2.xlsx"
-m <- read_excel(fname, range = cell_cols("B:F")) # tibble
-m[is.na(m)] <- "NA" # replace na with "NA"
-# Convert to base data.frame
-m_df <- as.data.frame(m)
-rownames(m_df) <- m_df$row_label
-m_df$row_label <- NULL
+#### Rename: agglomerate names when multiple ASVs are differentially abundant or not
+rel_wide <- get_rel_agglom(ps, ancom_fname, rel_ab_cutoff, p_threshold)
 
-# Choose DA Taxa
-ancom_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold, rel_ab_cutoff, write2excel = FALSE)
-DA_taxa <- ancom_taxa$high_ab 
-
-# -------- Define groups ---------
-
-# define taxa in which at least one sample has abundance > rel_ab_cutoff
-high_ab_taxa <- get_rel_ASV(ps) %>%
-  filter(Abundance > rel_ab_cutoff) %>%
-  distinct(OTU) %>%
-  pull(OTU)
-
-rel_wide <- get_rel_ASV(ps) %>%
-  filter(OTU %in% high_ab_taxa) %>%
-  dplyr::select(OTU, Sample, Abundance) %>%  
-  pivot_wider(
-    names_from = Sample,
-    values_from = Abundance
-  ) %>%
-  .[, c("OTU", sam_name)] %>%
-  mutate(
-    DA = ifelse(OTU %in% DA_taxa, "T", "F")
-  )
-
-# agglomerate significant and insignificant taxa separately
-combine_names <- function(data) {
-  data %>%
-    # define name_prefix - just the core OTU name without "-#" at the end
-    mutate(
-      name_prefix = if_else(
-        grepl("[0-9]$", OTU),       # last character is a number
-        sub("-[^-]+$", "", OTU),    # remove last dash and everything after
-        OTU                         # last character is a letter → keep full OTU
-      )
-    ) %>%
-    # sum relative abundance of groups with same name_prefix and DA
-    group_by(DA, name_prefix) %>%
-    summarise(
-      n = n(), # number of rows in group
-      OTU_orig = first(OTU),  # only used when n = 1
-      across(all_of(sam_name), \(x) sum(x, na.rm = TRUE)),
-      .groups = "drop"
-    ) %>%
-    # create new name
-    mutate(
-      OTU = if_else(
-        n == 1,
-        OTU_orig,
-        paste0(name_prefix, "_", DA)
-      )
-    ) %>%
-    select(OTU, DA, all_of(sam_name))
-}
-
-pseudo <- 1e-6  # choose based on detection limit
-
-# Agglomerate data and re-name
-data_mat <- combine_names(rel_wide) %>%
-  select(-DA) %>%
+# Convert to log
+data_mat <- rel_wide %>%
+  select(-Genus, -DA) %>%
   column_to_rownames("OTU") %>%
   as.matrix() %>%
   { log10(. + pseudo) }
 
-DA_taxa_renamed <- combine_names(rel_wide) %>%
+# Names of DA taxa
+DA_taxa_renamed <- rel_wide %>%
   filter(DA == "T") %>%
   pull(OTU)
+
+#### Load metabolism
+m_df <- as.data.frame(get_metabolism(rel_wide, metab_fname))
 
 # ---- Plotting
 n_cols <- ncol(data_mat)
@@ -116,10 +65,9 @@ row_fontface <- ifelse(
 # Relative Abundance
 ht_colors <- met.brewer(taxa_pal, type = "continuous")
 # Size
-sz_colors <- c(rep("lightgray", n_sizes)) # met.brewer(size_pal, n_sizes)
+sz_colors <- c(rep("lightgray", n_sizes)) 
 # Metabolism
-m_colors  <- c("P" = "#66C24A", "V" = "#EAEC3F", "NA" = NA) 
-# m_colors  <- c("P" = "#66C24A", "V" = "#EAEC3F","N" = "lightgray", "NA" = "#B6B6B6") 
+m_colors  <- c("P" = "#66C24A", "V" = "#EAEC3F") 
 
 # Size Annotation
 size_annot <- HeatmapAnnotation(
@@ -143,14 +91,13 @@ m_annot <- rowAnnotation(
     rep(list(m_colors), ncol(m_df)),
     colnames(m_df)
   ),
+  na_col = NA, # no color for NA
   show_legend = c(TRUE, c(rep(FALSE, length(m_df)-1))),  # Only first column contributes
   annotation_legend_param = list(
     title = "Metabolism\n& Cell Properties",
     title_position = "topcenter",
     at = c("P", "V"),
     labels = c("Positive", "Variable"),
-    # at = c("P", "V", "N", "NA"),
-    # labels = c("Positive", "Variable", "Negative", "Not Assessed"),
     nrow = 1
   )
 )
