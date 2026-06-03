@@ -1,16 +1,14 @@
+# NOTE: Not filtering based on rel_ab_cutoff
+# This is to verify that major metabolic groups are not being dropped
+
 rm(list = ls())
 source("./code/R/01_load_ps.R")
 source("./code/R/02_metab_and_DA.R")
 
-# define taxa in which at least one sample has abundance > rel_ab_cutoff
-high_ab_taxa <- get_rel_ASV(ps) %>%
-  filter(Abundance > rel_ab_cutoff) %>%
-  distinct(OTU) %>%
-  pull(OTU)
+write2excel <- 0
 
 # Define relative abundance
 ASV_size <- get_rel_ASV(ps) %>%
-  filter(OTU %in% high_ab_taxa) %>%
   group_by(Genus, OTU, size.name) %>%
   summarize(
     mean_ab = mean(Abundance),
@@ -93,3 +91,33 @@ p <- ggplot(data = df,
 # Save plot
 fname <- "./figures/metabolism.png"
 ggsave(fname, plot = p, width = 6.5, height = 5, dpi = 300)
+
+
+
+# ------ Write Data to Excel
+
+if (write2excel == 1) {
+  ### Do not filter by rel_ab_cutoff
+  # define relative abundance
+  rel_wide <- get_rel_ASV(ps) %>%
+    dplyr::select(Genus, OTU, Sample, Abundance) %>%  
+    pivot_wider(
+      names_from = Sample,
+      values_from = Abundance
+    ) %>%
+    dplyr::select(Genus, OTU, all_of(sam_name)) 
+  
+  new_m <- get_metabolism(rel_wide, metab_fname) %>%
+    # tf is true if any values in row are defined
+    mutate(tf = as.integer(if_any(everything(), ~ !is.na(.x)))) %>%
+    rownames_to_column(var = "OTU")
+  
+  full_df <- left_join(rel_wide, new_m, by = "OTU") %>%
+    filter(tf == 1) %>%
+    dplyr::select(-tf) %>%
+    relocate(where(is.numeric), .after = where(is.character)) %>%
+    arrange(Genus)
+  
+  library(writexl)
+  write_xlsx(full_df, path = "./data/rel_ab_metab.xlsx")
+}
