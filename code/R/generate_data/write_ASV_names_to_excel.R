@@ -5,7 +5,7 @@ source("./code/R/01_load_data.R")
 source("./code/R/02_process_ps.R")
 source("./code/R/03_subset.R")
 
-fname_out <- "./data/ASV_names.xlsx"
+fname_out <- "./data/ASV_taxonomy.xlsx"
 
 # Define taxa in which at least one sample has abundance > rel_ab_cutoff
 high_ab_taxa <- get_rel_ASV(ps) %>%
