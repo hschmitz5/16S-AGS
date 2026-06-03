@@ -1,11 +1,6 @@
 rm(list = ls())
-source("./code/R/00_setup.R")
-source("./code/R/01_load_data.R")
-source("./code/R/02_process_ps.R")
-source("./code/R/03_metab_and_DA.R")
-
-# Metabolism input file
-metab_fname <- "./data/metabolism_midas.xlsx"
+source("./code/R/01_load_ps.R")
+source("./code/R/02_metab_and_DA.R")
 
 # define taxa in which at least one sample has abundance > rel_ab_cutoff
 high_ab_taxa <- get_rel_ASV(ps) %>%
