@@ -96,7 +96,6 @@ bot_annot <- HeatmapAnnotation(
     )
   ),
   annotation_name_side = "left"
-  # annotation_name_rot = 0
 )
 
 # metabolism annotation
