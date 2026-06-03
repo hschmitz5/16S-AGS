@@ -1,3 +1,5 @@
+library(readxl)
+
 # ANCOM-BC2 differential abundance data
 ancom_fname <- "./data/ancombc2_ASV.rds"
 # Metabolism input file
