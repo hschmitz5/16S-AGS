@@ -1,3 +1,8 @@
+# ANCOM-BC2 differential abundance data
+ancom_fname <- "./data/ancombc2_ASV.rds"
+# Metabolism input file
+metab_fname <- "./data/metabolism_midas.xlsx"
+
 get_metabolism <- function(df, metab_fname) {
   m <- read_excel(metab_fname, sheet = "input") # tibble
   
