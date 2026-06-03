@@ -1,7 +1,6 @@
-source("./code/R/00_setup.R")
-source("./code/R/01_load_data.R")
-source("./code/R/02_process_ps.R")
 library(picante)
+source("./code/R/01_load_ps.R")
+source("./code/R/02_metab_and_DA.R")
 
 fname_div <- "./figures/diversity.png"
 
@@ -11,11 +10,15 @@ div_type = c("Shannon")
 # Faith's phylogenetic diversity
 metadata <- get_metadata(ps)
 
+# community data
 comm <- as.data.frame(as.matrix(ps@otu_table)) %>%
   t() 
 
+# phylogenetic tree
 phy <- ps@phy_tree
 
+# PD: phylogenetic diversity (Faith's)
+# SR: species richness
 pd_results <- pd(comm, phy) %>%
   rownames_to_column(var = "Sample") %>%
   left_join(metadata, join_by(Sample))
