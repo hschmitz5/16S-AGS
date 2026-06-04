@@ -8,7 +8,8 @@ library(tidyverse)
 # define sample names
 size <- data.frame(
   ranges = c("0.43-0.85","0.85-1.4", "1.4-2", "2-2.8", "2.8-4", ">4"),
-  name = c("floccular", "S", "M", "L", "XL", "XXL")
+  name = c("floccular", "S", "M", "L", "XL", "XXL"),
+  midpoint = c(0.64, 1.125, 1.7, 2.4, 3.4, 4.5)
 )
 
 # Import QIIME2 data as phyloseq object
@@ -19,8 +20,9 @@ ps <- qiime2R::qza_to_phyloseq(
   metadata = "./data/qiime/sample-metadata.tsv"
 )
 
-ps@sam_data$size.mm <- factor(ps@sam_data$size.mm, levels = size$ranges)
-ps@sam_data$size.name <- factor(size$name[as.numeric(ps@sam_data$size.mm)], levels = size$name)
+ps@sam_data$size.mm       <- factor(ps@sam_data$size.mm, levels = size$ranges)
+ps@sam_data$size.name     <- factor(size$name[as.numeric(ps@sam_data$size.mm)], levels = size$name)
+ps@sam_data$size.midpoint <- factor(size$midpoint[as.numeric(ps@sam_data$size.mm)], levels = size$midpoint)
   
 # ------ Filter ------
 
