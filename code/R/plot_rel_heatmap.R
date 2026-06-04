@@ -39,13 +39,8 @@ DA_taxa_renamed <- rel_wide %>%
   pull(OTU)
 
 #### Load metabolism
-m_df <- as.data.frame(get_metabolism(rel_wide, metab_fname))
-
-#### Load Diversity
-pd <- get_diversity(ps) 
-# y-axis limits
-ylim1 <- floor(min(pd$PD) / 10) * 10
-ylim2 <- ceiling(max(pd$PD) / 10) * 10
+m_df <- as.data.frame(get_metabolism(rel_wide, metab_fname)) %>%
+  rename(`NO2 reduction` = `Nitrite reduction`)
 
 # ---- Plotting
 n_cols <- ncol(data_mat)
@@ -73,9 +68,8 @@ sz_colors <- c(rep("lightgray", n_sizes))
 # Metabolism
 m_colors  <- c("P" = "#66C24A", "V" = "#EAEC3F") 
 
-
-bot_annot <- HeatmapAnnotation(
-  # size annotation
+# size annotation
+size_annot <- HeatmapAnnotation(
   sz = anno_block(
     gp = gpar(
       fill = sz_colors,
@@ -86,16 +80,7 @@ bot_annot <- HeatmapAnnotation(
       col = c(rep("black", n_sizes)), 
       fontsize = col_fontsize
     )
-  ),
-  # diversity annotation
-  Diversity = anno_points(
-    pd, 
-    ylim = c(ylim1, ylim2),
-    axis_param = list(
-      at = c(ylim1, mean(c(ylim1, ylim2)), ylim2)
-    )
-  ),
-  annotation_name_side = "left"
+  )
 )
 
 # metabolism annotation
@@ -110,35 +95,33 @@ m_annot <- rowAnnotation(
   # legend
   show_legend = c(TRUE, c(rep(FALSE, length(m_df)-1))),  # Only first column contributes
   annotation_legend_param = list(
-    title = "Metabolism\n& Cell Properties",
-    title_position = "topcenter",
+    title = NULL, #"Metabolism\n& Cell Properties",
+    #title_position = "topcenter",
     at = c("P", "V"),
     labels = c("Positive", "Variable"),
-    nrow = 1
-  )
+    nrow = 2
+  ),
+  annotation_name_side = "top",
+  annotation_name_rot = 60
 )
 
 ht <- Heatmap(
   data_mat,
   # columns
+  column_title = "Relative Abundance",
   cluster_columns = FALSE, # changes sample order
   show_column_names = FALSE,
   column_split = split, # put a gap between sizes
-  column_title = NULL,
-  # rows
-  show_row_names = TRUE,
-  row_names_side = "right", 
-  row_dend_side = "left",
   # heatmap legend
   show_heatmap_legend = TRUE, 
   col = ht_colors,
   heatmap_legend_param = list(
-    title = "Relative Abundance\n(Log (%))",
+    title = "Log (%)", #Relative Abundance\n(Log (%))
     direction = "horizontal",
-    title_position = "topcenter"
+    title_position = "lefttop"
   ),
   # Annotations
-  bottom_annotation = bot_annot,
+  bottom_annotation = size_annot,
   right_annotation = m_annot, 
   # Display size
   width  = unit(n_cols * cell_w, "inches"),
