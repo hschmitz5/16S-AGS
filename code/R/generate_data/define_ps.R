@@ -22,7 +22,7 @@ ps <- qiime2R::qza_to_phyloseq(
 
 ps@sam_data$size.mm       <- factor(ps@sam_data$size.mm, levels = size$ranges)
 ps@sam_data$size.name     <- factor(size$name[as.numeric(ps@sam_data$size.mm)], levels = size$name)
-ps@sam_data$size.midpoint <- factor(size$midpoint[as.numeric(ps@sam_data$size.mm)], levels = size$midpoint)
+ps@sam_data$size.midpoint <- size$midpoint[as.numeric(ps@sam_data$size.mm)]
   
 # ------ Filter ------
 
