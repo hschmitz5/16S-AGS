@@ -58,7 +58,7 @@ df <- bind_rows(df_P, df_V) %>%
 # Convert to factor
 df$size.name <- factor(df$size.name, levels = size$name)
 df$metab <- factor(
-  df$metab, levels = c("GAO", "PAO", "Nitrite reduction", "Filamentous", "AOB", "NOB")
+  df$metab, levels = c("GAO", "PAO", "Nitrite reduction", "Filamentous", "NOB", "AOB")
 )
 df$panel <- factor(
   df$panel, levels = c("Nitrite reduction & GAO", "Filamentous & PAO", "AOB & NOB")
@@ -83,7 +83,7 @@ p <- ggplot(data = df,
   ) +
   theme_minimal(base_size = 12) +
   theme(
-    legend.position = "bottom",
+    legend.position = "top",
     legend.key.spacing.x = unit(0.5, "in"),
     legend.title = element_blank()
   )
