@@ -23,6 +23,7 @@ m <- get_metabolism(ASV_size, metab_fname)
 # define taxa in each metabolism group
 taxa_P <- map(m, ~ rownames(m)[which(.x == "P")])
 taxa_V <- map(m, ~ rownames(m)[which(.x == "V")])
+taxa_PV <- map(m, ~ rownames(m)[.x %in% c("P", "V")])
 
 # function sums up values when taxa = P or V
 summarize_metab <- function(taxa_list, value_col) {
@@ -35,14 +36,19 @@ summarize_metab <- function(taxa_list, value_col) {
         sum_sd   = sum(std_ab, na.rm = TRUE),
         .groups = "drop"
       ) %>%
-      mutate(metab_val = value_col, metab = nm) 
+      mutate(metab_val = value_col, metab = nm) %>%
+      dplyr::select(metab_val, metab, size.name, sum_mean, sum_sd)
   }) 
 }
 
-df_P <- summarize_metab(taxa_P, "P")
-df_V <- summarize_metab(taxa_V, "V")
+df_P  <- summarize_metab(taxa_P, "P") 
+df_V  <- summarize_metab(taxa_V, "V") 
+df_PV <- summarize_metab(taxa_PV, "P + V") %>%
+  filter(metab %in% unique(df_V$metab))
+
+
 # joins data sets
-df <- bind_rows(df_P, df_V) %>%
+df <- bind_rows(df_P, df_PV) %>%
   # define panel grouping
   mutate(
     panel = case_when(
@@ -50,7 +56,7 @@ df <- bind_rows(df_P, df_V) %>%
       metab %in% c("PAO", "Filamentous") ~ "Filamentous & PAO",
       metab %in% c("AOB", "NOB") ~ "AOB & NOB"
     ),
-    metab_val = recode(metab_val, "P" = "Positive", "V" = "Variable")
+    metab_val = recode(metab_val, "P" = "Positive", "P + V" = "Positive + Variable")
   ) %>%
   # reorder
   dplyr::select(panel, metab, metab_val, size.name, sum_mean, sum_sd)
@@ -58,7 +64,7 @@ df <- bind_rows(df_P, df_V) %>%
 # Convert to factor
 df$size.name <- factor(df$size.name, levels = size$name)
 df$metab <- factor(
-  df$metab, levels = c("GAO", "PAO", "Nitrite reduction", "Filamentous", "NOB", "AOB")
+  df$metab, levels = c("GAO", "PAO", "Nitrite reduction", "Filamentous", "AOB", "NOB")
 )
 df$panel <- factor(
   df$panel, levels = c("Nitrite reduction & GAO", "Filamentous & PAO", "AOB & NOB")
