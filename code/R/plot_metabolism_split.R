@@ -8,13 +8,7 @@ source("./code/R/02_metab_and_DA.R")
 write2excel <- 0
 
 # Define relative abundance
-rel_size <- get_rel(ps) %>%
-  group_by(Genus, size.name) %>%
-  summarize(
-    mean_ab = mean(Abundance),
-    std_ab  = sd(Abundance),
-    .groups = "drop"
-  ) 
+rel_size <- get_rel(ps) 
 
 # Load metabolism data
 # Input must contain Genus
@@ -30,18 +24,24 @@ summarize_metab <- function(taxa_list, value_col) {
   map_dfr(names(taxa_list), function(nm) {
     rel_size %>%
       filter(Genus %in% taxa_list[[nm]]) %>%
-      group_by(size.name) %>%
+      group_by(Sample, size.name) %>%
       summarize(
-        sum_mean = sum(mean_ab, na.rm = TRUE),
-        sum_sd   = sum(std_ab, na.rm = TRUE),
+        sum_abund = sum(Abundance, na.rm = TRUE),
         .groups = "drop"
       ) %>%
       mutate(metab_val = value_col, metab = nm) %>%
-      dplyr::select(metab_val, metab, size.name, sum_mean, sum_sd)
+      dplyr::select(metab_val, metab, Sample, size.name, sum_abund)
   }) 
 }
 
-df_P  <- summarize_metab(taxa_P, "P") 
+df_P  <- summarize_metab(taxa_P, "P") %>%
+  group_by(metab, size.name) %>%
+  summarize(
+    mean_agglom = mean(sum_abund, na.rm = TRUE),
+    sd_agglom = sd(sum_abund, na.rm = TRUE),
+    .groups = "drop"
+  ) 
+  
 df_V  <- summarize_metab(taxa_V, "V") 
 # P + V: only sum metab found in V
 df_PV <- summarize_metab(taxa_PV, "P + V") %>%
