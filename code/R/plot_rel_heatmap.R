@@ -6,6 +6,9 @@ source("./code/R/02_metab_and_DA.R")
 # Figure output location
 fname_rel <- "./figures/rel_ab_heatmap.png"
 
+# number of rows to show
+n_show <- 30
+
 write2excel <- 0
 
 # Cell height in inches (adjust as needed)
@@ -20,27 +23,36 @@ col_fontsize <- 11
 # (choose based on detection limit)
 pseudo <- 1e-6  
 
-# --------- Data ------------
+# ------ Define Data ------
 
-#### Rename: agglomerate names when multiple ASVs are differentially abundant or not
-rel_wide <- get_rel_agglom(ps, ancom_fname, rel_ab_cutoff, p_threshold)
+# Relative Abundance
+rel_wide <- get_rel_wide(ps) %>%
+  # Arrange taxa from largest to smallest abundance
+  mutate(row_sum = rowSums(.)) %>%
+  arrange(desc(row_sum)) %>%
+  # Keep the top n_show
+  head(., n = n_show) %>%
+  dplyr::select(-row_sum) 
+
+## Check what percent of relative abundance is included in plot
+# sum per sample
+rel_sum <- colSums(rel_wide)
 
 # Convert to log
-data_mat <- rel_wide %>%
-  select(-Genus, -DA) %>%
-  column_to_rownames("OTU") %>%
-  as.matrix() %>%
-  { log10(. + pseudo) }
+data_mat <- as.matrix(rel_wide) %>%
+  { log10(. + pseudo) } 
 
-# Names of DA taxa
-DA_taxa_renamed <- rel_wide %>%
-  filter(DA == "T") %>%
-  pull(OTU)
+# Metabolism
+m_df <- rel_wide %>%
+  rownames_to_column(var = "Genus") %>%
+  get_metabolism(., metab_fname) 
 
-#### Load metabolism
-m_df <- as.data.frame(get_metabolism(rel_wide, metab_fname)) 
+# DA taxa
+DA_taxa <- get_ancom_taxa(ancom_fname, ps, p_threshold)
 
-# ---- Plotting
+
+#### ---- Plotting ------
+
 n_cols <- ncol(data_mat)
 n_rows <- nrow(data_mat)
 split = rep(1:n_sizes, each = n_replicates)
@@ -48,9 +60,9 @@ split = rep(1:n_sizes, each = n_replicates)
 # Labels
 row_labels <- rownames(data_mat)
 # italicize species + _g, but not _f/_o/_c/_p
-italic_rows <- grepl("_(g|s)(?:_|$|-)", row_labels)
+italic_rows <- !grepl("^(Unk|midas)", row_labels) 
 # bold significant taxa
-bold_rows <- row_labels %in% DA_taxa_renamed
+bold_rows <- row_labels %in% DA_taxa
 # Apply
 row_fontface <- ifelse(
   bold_rows & italic_rows, "bold.italic",
@@ -129,38 +141,12 @@ ht <- Heatmap(
 
 # Draw combined heatmap
 png(fname_rel,
-    width = 8,  # width in inches; can adjust
-    height = 10.5, # height in inches; can adjust
+    width = 7,  # width in inches; can adjust
+    height = 8, # height in inches; can adjust
     units = "in", res = 300)
 draw(ht, heatmap_legend_side = "top", annotation_legend_side = "top") 
 dev.off()
 
-
-#### Check what percent of relative abundance is included in plot
-# sum per sample
-rel_sum <- rel_wide %>%
-  dplyr::select(-Genus, -DA) %>%
-  column_to_rownames(var = "OTU") %>%
-  colSums() 
 # min and max of all sample sums
 message(paste("Heatmap Min:", round(min(rel_sum), 2), "%"))
 message(paste("Heatmap Max:", round(max(rel_sum), 2), "%"))
-
-
-#### Export to Excel
-
-if (write2excel == 1) {
-  new_m <- m_df %>%
-    # tf is true if any values in row are defined
-    mutate(tf = as.integer(if_any(everything(), ~ !is.na(.x)))) %>%
-    rownames_to_column(var = "OTU")
-  
-  full_df <- left_join(rel_wide, new_m, by = "OTU") %>%
-    filter(tf == 1) %>%
-    dplyr::select(-DA, -tf) %>%
-    relocate(where(is.numeric), .after = where(is.character)) %>%
-    arrange(Genus)
-  
-  library(writexl)
-  write_xlsx(full_df, path = "./data/rel_ab_metab_high_ab.xlsx")
-}
