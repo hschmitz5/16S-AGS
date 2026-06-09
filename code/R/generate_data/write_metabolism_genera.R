@@ -15,6 +15,7 @@ taxa_names <- get_rel(ps) %>%
 high_ab_genera <- get_rel_wide(ps) %>%
   rownames_to_column(var = "Genus") %>%
   filter(Genus %in% taxa_names) %>%
-  arrange(Genus) 
+  arrange(Genus) %>%
+  dplyr::select(Genus)
  
 write_xlsx(high_ab_genera, path = fname_out)
