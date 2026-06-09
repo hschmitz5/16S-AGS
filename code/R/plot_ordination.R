@@ -1,12 +1,10 @@
 rm(list = ls())
-library(ggConvexHull)
 source("./code/R/01_load_ps.R")
 
-fname_ord <- "./figures/ordination-PCoA.png"
-fname_ord2 <- "./figures/ordination-PCoA-mu.png"
+fname_ord <- "./figures/ordination-PCoA-genus.png"
 
 # load phyloseq object for all sample sizes
-ps_full <- readRDS("./data/ps_ASV_full.rds")
+ps_full <- readRDS("./data/ps_genus_full.rds") 
 
 # ps_full: all sample groups
 ps.ord <- ordinate(ps_full, "PCoA", "wunifrac")
@@ -19,7 +17,7 @@ shapes <- c(16, 17, 15, 18, 3, 7)
 cols <- c("gray", met.brewer(size_pal, n_sizes))
 
 p <- plot_ordination(ps_full, ps.ord, shape = "size.name", color="size.name") +
-  geom_convexhull(alpha = 0.5, aes(fill = size.name)) +
+  geom_polygon(alpha = 0.5, aes(fill = size.name)) +
   scale_shape_manual(values = shapes) +
   scale_color_manual(values = cols) +
   scale_fill_manual(values = cols) +
