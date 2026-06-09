@@ -1,26 +1,21 @@
 rm(list = ls())
-source("./code/R/00_setup.R")
-source("./code/R/01_load_data.R")
-source("./code/R/02_process_ps.R")
 library(vegan)
-
-ano_fname <- "./figures/anosim_plot.png"
-txt_fname <- "./figures/ANOSIM.txt"
+source("./code/R/01_load_ps.R")
 
 # Define a base font size in points
 text_size <- 10
+
+metadata <- get_metadata(ps)
 
 ps.dist <- distance(ps, method = "wunifrac" ) # weighted
 invisible(ps.dist)
 #show(ps.dist)
 
-metadata <- get_metadata(ps)
-
 ps.ano <- anosim(ps.dist, metadata$size.name, permutations = 9999)
 
-# Get summary
+# Get summary and write to a text file
+txt_fname <- "./figures/ANOSIM.txt"
 anosim_summary <- capture.output(summary(ps.ano))
-# Write it to a text file
 writeLines(anosim_summary, con = txt_fname)
 
 # ------- Plot --------
@@ -46,4 +41,5 @@ anosim_plot <- ggplot(ano_df, aes(x = group, y = rank)) +
   ) +
   theme_minimal(base_size = text_size)
 
+ano_fname <- "./figures/anosim_plot.png"
 ggsave(ano_fname, plot = anosim_plot, width = 4, height = 3, dpi = 300)
