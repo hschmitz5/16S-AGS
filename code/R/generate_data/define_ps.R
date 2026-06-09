@@ -7,9 +7,9 @@ library(tidyverse)
 
 # define sample names
 size <- data.frame(
-  ranges = c("0.43-0.85","0.85-1.4", "1.4-2", "2-2.8", "2.8-4", ">4"),
+  ranges = c("0-0.85","0.85-1.4", "1.4-2", "2-2.8", "2.8-4", ">4"),
   name = c("floccular", "S", "M", "L", "XL", "XXL"),
-  midpoint = c(0.64, 1.125, 1.7, 2.4, 3.4, 4.5)
+  midpoint = c(0.425, 1.125, 1.7, 2.4, 3.4, 4.5)
 )
 
 # Import QIIME2 data as phyloseq object
@@ -26,56 +26,71 @@ ps@sam_data$size.midpoint <- size$midpoint[as.numeric(ps@sam_data$size.mm)]
   
 # ------ Filter ------
 
-# remove Mitochondria and Chloroplasts (removes Eukaryotes)
-ps_filt0 <- phyloseq::subset_taxa(ps, ! Family %in% c("Mitochondria", "Chloroplast"))
-# remove unclassified sequences
-ps_filt0 <- phyloseq::subset_taxa(ps, Kingdom != "Unassigned")
-  
-# ------ Rarefy ------
-
-# define minimum depth to rarefy
-rarefy_level <- min(sample_sums(ps_filt0))  # lowest number of ASVs per sample
-# apply rarefaction
-ps_filt <-rarefy_even_depth(
-  ps_filt0, rarefy_level, rngseed = 7, replace = TRUE, trimOTUs = TRUE, verbose = TRUE
+ps_filt0 <- phyloseq::subset_taxa(ps,
+                                 # remove unclassified sequences
+                                 (Kingdom != "Unassigned") &
+                                 # remove Chloroplasts and Mitochondria
+                                 (Order != "Chloroplast") &
+                                 (Family != "Mitochondria")
 )
 
-# ------ Generate new names for OTUs -------
+# Keep taxa present in at least three samples
+keep_prev <- rowSums(otu_table(ps_filt0) > 0) >= 3
+# Keep taxa with at least 10 total reads across all samples
+keep_abund <- taxa_sums(ps_filt0) >= 10
+# Apply conditions
+ps_filt <- prune_taxa(keep_prev & keep_abund, ps_filt0)
 
-taxonomy <- as.data.frame(as.matrix(ps_filt@tax_table)) %>%
+# ------ Agglomerate, cutting NA values ------
+
+# tax_glom deletes NA values by default
+ps_genus_short = tax_glom(ps_filt, "Genus")
+
+# ------ Agglomerate, keeping NA values  ------
+
+# If Genus is NA, then replace with higher order
+taxonomy <- as.data.frame(ps_filt@tax_table) %>%
   rownames_to_column("OTU") %>%
   mutate(
-    Species_tmp = case_when(
-      is.na(Phylum) ~ paste0("Phylum_unknown"),
-      !is.na(Species) & !startsWith(Species, "midas") ~ paste0(Species, "_s"), 
-      !is.na(Genus)   & !startsWith(Genus, "midas")   ~ paste0(Genus,   "_g"),
-      !is.na(Family)  & !startsWith(Family, "midas")  ~ paste0(Family,  "_f"),
-      !is.na(Order)   & !startsWith(Order, "midas")   ~ paste0(Order,   "_o"),
-      !is.na(Class)   & !startsWith(Class, "midas")   ~ paste0(Class,   "_c"),
-      !is.na(Phylum)  & !startsWith(Phylum, "midas")  ~ paste0(Phylum,  "_p"),
-      .default = Species 
+    Genus = case_when(
+      !is.na(Genus)  ~ Genus,
+      !is.na(Family) ~ ifelse(startsWith(Family, "midas"), paste0("Unk_", Family), paste0("Unk_f_", Family)),
+      !is.na(Order)  ~ ifelse(startsWith(Order, "midas"), paste0("Unk_", Order), paste0("Unk_o_", Order)),
+      !is.na(Class)  ~ ifelse(startsWith(Class, "midas"), paste0("Unk_", Class), paste0("Unk_c_", Class)),
+      !is.na(Phylum) ~ ifelse(startsWith(Phylum, "midas"), paste0("Unk_", Phylum), paste0("Unk_p_", Phylum)),
+      is.na(Phylum)  ~ paste0("Unknown_Phylum"),
+      .default = Genus
     )
   ) %>%
-  group_by(Species_tmp) %>%
+  # name ASVs
+  group_by(Genus) %>%
   mutate(
-    Species_updated = if (n() == 1) {
-      Species_tmp
+    new_OTU = if (n() == 1) {
+      Genus
     } else {
-      paste0(Species_tmp, "-", row_number())
+      paste0(Genus, "-", row_number())
     }
   ) %>%
   ungroup() %>%
-  dplyr::select(-Species_tmp) %>%
   column_to_rownames("OTU") %>%
   as.matrix()
 
-# Add Species_updated to phyloseq object
+# Add new taxonomy to phyloseq object
 tax_table(ps_filt) <- tax_table(taxonomy)
-  
-# Save
-saveRDS(ps_filt, file = "./data/ps_ASV_full.rds")
+rm(taxonomy)
+
+
+# uses updated taxonomy to keep NA values
+ps_genus = tax_glom(ps_filt, "Genus")
+
+
+# ------ Save ------
+
+saveRDS(ps_filt,        file = "./data/ps_ASV_full.rds")
+saveRDS(ps_genus_short, file = "./data/ps_genus_cut_NA.rds")
+saveRDS(ps_genus,       file = "./data/ps_genus_full.rds")
 
 # remove XS granules
-ps_sub <- subset_samples(ps_filt, size.mm != "0.43-0.85")
+ps_sub <- subset_samples(ps_genus, size.name != "floccular")
   
-saveRDS(ps_sub, file = "./data/ps_ASV_subset.rds")
+saveRDS(ps_sub, file = "./data/ps_genus_subset.rds")
