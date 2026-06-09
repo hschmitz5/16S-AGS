@@ -1,4 +1,4 @@
-# NOTE: Not filtering based on rel_ab_cutoff
+# NOTE: Using all data, not just top n_show
 # This is to verify that major metabolic groups are not being dropped
 
 rm(list = ls())
@@ -8,8 +8,8 @@ source("./code/R/02_metab_and_DA.R")
 write2excel <- 0
 
 # Define relative abundance
-ASV_size <- get_rel_ASV(ps) %>%
-  group_by(Genus, OTU, size.name) %>%
+rel_size <- get_rel(ps) %>%
+  group_by(Genus, size.name) %>%
   summarize(
     mean_ab = mean(Abundance),
     std_ab  = sd(Abundance),
@@ -18,7 +18,7 @@ ASV_size <- get_rel_ASV(ps) %>%
 
 # Load metabolism data
 # Input must contain Genus
-m <- get_metabolism(ASV_size, metab_fname)
+m <- get_metabolism(rel_size, metab_fname)
 
 # define taxa in each metabolism group
 taxa_P <- map(m, ~ rownames(m)[which(.x == "P")])
@@ -28,8 +28,8 @@ taxa_PV <- map(m, ~ rownames(m)[.x %in% c("P", "V")])
 # function sums up values when taxa = P or V
 summarize_metab <- function(taxa_list, value_col) {
   map_dfr(names(taxa_list), function(nm) {
-    ASV_size %>%
-      filter(OTU %in% taxa_list[[nm]]) %>%
+    rel_size %>%
+      filter(Genus %in% taxa_list[[nm]]) %>%
       group_by(size.name) %>%
       summarize(
         sum_mean = sum(mean_ab, na.rm = TRUE),
@@ -43,6 +43,7 @@ summarize_metab <- function(taxa_list, value_col) {
 
 df_P  <- summarize_metab(taxa_P, "P") 
 df_V  <- summarize_metab(taxa_V, "V") 
+# P + V: only sum metab found in V
 df_PV <- summarize_metab(taxa_PV, "P + V") %>%
   filter(metab %in% unique(df_V$metab))
 
@@ -103,22 +104,17 @@ ggsave(fname, plot = p, width = 6.5, height = 5, dpi = 300)
 # ------ Write Data to Excel
 
 if (write2excel == 1) {
-  ### Do not filter by rel_ab_cutoff
+  ### Do not exclude data
   # define relative abundance
-  rel_wide <- get_rel_ASV(ps) %>%
-    dplyr::select(Genus, OTU, Sample, Abundance) %>%  
-    pivot_wider(
-      names_from = Sample,
-      values_from = Abundance
-    ) %>%
-    dplyr::select(Genus, OTU, all_of(sam_name)) 
+  rel_wide <- get_rel_wide(ps) %>%
+    rownames_to_column(var = "Genus")
   
   new_m <- get_metabolism(rel_wide, metab_fname) %>%
-    # tf is true if any values in row are defined
+    # true if any metabolic groups in row are defined
     mutate(tf = as.integer(if_any(everything(), ~ !is.na(.x)))) %>%
-    rownames_to_column(var = "OTU")
+    rownames_to_column(var = "Genus")
   
-  full_df <- left_join(rel_wide, new_m, by = "OTU") %>%
+  full_df <- left_join(rel_wide, new_m, by = "Genus") %>%
     filter(tf == 1) %>%
     dplyr::select(-tf) %>%
     relocate(where(is.numeric), .after = where(is.character)) %>%
