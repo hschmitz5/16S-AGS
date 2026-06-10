@@ -106,6 +106,12 @@ row_labels <- rownames(data_mat)
 italic_rows <- !grepl("^(Unk|midas)", row_labels) 
 row_fontface <- ifelse(italic_rows, "italic", "plain")
 
+# Heatmap
+col_fun <- colorRamp2(
+  c(min(data_mat), 0, max(data_mat)), 
+  c("dodgerblue4", "white", "red3")
+)
+
 ht <- Heatmap(
   data_mat,
   # columns
@@ -114,9 +120,11 @@ ht <- Heatmap(
   column_names_rot = 0,
   column_names_centered = TRUE,
   # heatmap legend
+  col = col_fun, 
   heatmap_legend_param = list(
     title = NULL, #"log fold change", 
-    direction = "horizontal"
+    direction = "horizontal",
+    legend_width = unit(4, "cm")
   ),
   # # Annotations
   right_annotation = m_annot,
