@@ -19,26 +19,26 @@ get_metabolism <- function(df, metab_fname) {
     column_to_rownames("Genus")
 }
 
-get_ancom_taxa <- function(fname_in, ps, p_threshold) {
-  # load differential abundance data
-  output <- readRDS(fname_in)
-  
-  taxonomy <- get_taxonomy(ps)
-  
-  # Subset based on significance and passing the sensitivity analysis
-  all_sig_taxa <- output$res %>%
-    rename(OTU = taxon) %>%
-    left_join(taxonomy, join_by(OTU)) %>%
-    # Combines diff_size* and passed_ss* together
-    pivot_longer(
-      cols = matches("q_size\\.name|passed_ss_size\\.name"),
-      names_to = c(".value","size"),
-      names_pattern = "(q|passed_ss)_size\\.name(.*)"
-    ) %>%
-    filter(q < p_threshold & passed_ss == TRUE) %>%   
-    distinct(Genus) %>%
-    pull(Genus)
-}
+# get_ancom_taxa <- function(fname_in, ps, p_threshold) {
+#   # load differential abundance data
+#   output <- readRDS(fname_in)
+#   
+#   taxonomy <- get_taxonomy(ps)
+#   
+#   # Subset based on significance and passing the sensitivity analysis
+#   DA_taxa <- output$res %>%
+#     rename(OTU = taxon) %>%
+#     left_join(taxonomy, join_by(OTU)) %>%
+#     # Combines diff_size* and passed_ss* together
+#     pivot_longer(
+#       cols = matches("q_size\\.name|passed_ss_size\\.name"),
+#       names_to = c(".value","size"),
+#       names_pattern = "(q|passed_ss)_size\\.name(.*)"
+#     ) %>%
+#     filter(q < p_threshold & passed_ss == TRUE) %>%   
+#     distinct(Genus) %>%
+#     pull(Genus)
+# }
 
 # Only the difference between bias corrected data is meaningful.
 # It is not a substitute for relative abundance.
