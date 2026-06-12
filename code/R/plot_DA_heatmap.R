@@ -1,7 +1,5 @@
 rm(list = ls())
 source("./code/R/01_load_ps.R")
-source("./code/R/02_metab_and_DA.R")
-library(writexl)
 library(ComplexHeatmap)
 library(circlize) # for colorRamp2
 
@@ -68,7 +66,7 @@ data_mat <- output$res %>%
 # Metabolism
 m_df <- as.data.frame(data_mat) %>%
   rownames_to_column(var = "Genus") %>%
-  get_metabolism(., metab_fname) 
+  get_metabolism() 
 
 # ---- Plotting
 
@@ -112,6 +110,8 @@ col_fun <- colorRamp2(
   c("dodgerblue4", "white", "red3")
 )
 
+breaks_display <- c(-3, -1.5, 0, 1.5, 3)
+
 ht <- Heatmap(
   data_mat,
   # columns
@@ -122,6 +122,8 @@ ht <- Heatmap(
   # heatmap legend
   col = col_fun, 
   heatmap_legend_param = list(
+    at = breaks_display,
+    labels = breaks_display,
     title = NULL, #"log fold change", 
     direction = "horizontal",
     legend_width = unit(4, "cm")

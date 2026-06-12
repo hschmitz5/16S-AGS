@@ -1,7 +1,6 @@
 rm(list = ls())
 library(ComplexHeatmap)
 source("./code/R/01_load_ps.R")
-source("./code/R/02_metab_and_DA.R")
 
 # Figure output location
 fname_rel <- "./figures/rel_ab_heatmap.png"
@@ -44,7 +43,7 @@ log_mat <- as.matrix(rel_df) %>%
 # Metabolism
 m_df <- rel_df %>%
   rownames_to_column(var = "Genus") %>%
-  get_metabolism(., metab_fname) 
+  get_metabolism() 
 
 
 #### ---- Plotting ------
