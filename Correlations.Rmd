@@ -18,6 +18,24 @@ source("./code/R/02_process_ps.R")
 source("./code/R/03_subset.R")
 source("./code/R/04_bias_correct.R")
 
+# Only the difference between bias corrected data is meaningful.
+# It is not a substitute for relative abundance.
+get_bc_abund <- function(fname) {
+  
+  output <- readRDS(fname)
+  
+  metadata <- get_metadata(ps)
+  
+  bc_long <- output$bias_correct_log_table %>%
+    rownames_to_column("OTU") %>%
+    filter(!is.na(OTU)) %>%
+    pivot_longer(-OTU, names_to = "Sample", values_to = "bc_abund") %>%
+    left_join(metadata, by = "Sample") %>%
+    dplyr::select(Sample, size.mm, size.name, OTU, bc_abund) 
+  
+  return(bc_long)
+}
+
 # For correlation
 size_midpoint <- c(1.125, 1.7, 2.4, 3.4, 4.5)
 
