@@ -74,6 +74,7 @@ get_rel_wide <- function(ps) {
 
 # input df must contain column named Genus
 get_metabolism <- function(df) {
+  library(readxl)
   m <- read_excel(metab_fname, sheet = "input") # tibble
   
   metab <- df %>%
