@@ -3,10 +3,7 @@ source("./code/R/01_load_ps.R")
 library(ComplexHeatmap)
 library(circlize) # for colorRamp2
 
-write2excel <- FALSE
 n_display_low <- 30
-
-fname_excel <- "./data/ANCOM_ASV.xlsx"
 
 # Cell height in inches (adjust as needed)
 cell_h <- 0.2
@@ -17,6 +14,7 @@ row_fontsize <- 10
 col_fontsize <- 11
 
 rel_ab_cutoff <- 0.5
+p_threshold <- 0.05
 
 # ------ Process Data -----
 
