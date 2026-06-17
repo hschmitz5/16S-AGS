@@ -11,7 +11,7 @@ write2excel <- 0
 metab_order <- c("GAO", "Filamentous", "AOB")
 n_rows <- length(metab_order)
 
-DA_df <- readRDS("./data/DA_metab_processed.rds") %>%
+DA_df <- readRDS("./data/DA/DA_metab_processed.rds") %>%
   mutate(metab = factor(metab, levels = metab_order))
     
 rel_ab_df <- join_rel_ab_and_function(ps) %>%
