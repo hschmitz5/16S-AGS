@@ -3,8 +3,8 @@ rm(list = ls())
 library(phyloseq)
 library(ANCOMBC)
 
-fname_P <- c("./data/phyloseq/ps_metab_P.rds", "./data/ancombc2_metab_P.rds")
-fname_PV <- c("./data/phyloseq/ps_metab_PV.rds", "./data/ancombc2_metab_PV.rds")
+fname_P <- c("./data/phyloseq/ps_metab_P.rds", "./data/DA/ancombc2_metab_P.rds")
+fname_PV <- c("./data/phyloseq/ps_metab_PV.rds", "./data/DA/ancombc2_metab_PV.rds")
 
 run_ancom <- function(fname_in, fname_out) {
   ps <- readRDS(fname_in) 
@@ -87,4 +87,4 @@ lfc_PV <- process_DA(output_PV, "Positive + Variable")
 
 lfc_full <- bind_rows(lfc_P, lfc_PV) 
 
-saveRDS(lfc_full, file = "./data/DA_metab_processed.rds")
+saveRDS(lfc_full, file = "./data/DA/DA_metab_processed.rds")
