@@ -79,6 +79,7 @@ process_DA <- function(output, value_col) {
   return(df)
 }
 
+# Make sure lfc_P and lfc_PV have the same metab groups defined
 lfc_P <- process_DA(output_P, "Positive") %>%
   filter(!is.na(robust))
 
