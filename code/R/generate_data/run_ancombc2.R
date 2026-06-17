@@ -3,8 +3,8 @@ rm(list = ls())
 library(phyloseq)
 library(ANCOMBC)
 
-fname_P <- c("./data/ps_metab_P.rds", "./data/ancombc2_metab_P.rds")
-fname_PV <- c("./data/ps_metab_PV.rds", "./data/ancombc2_metab_PV.rds")
+fname_P <- c("./data/phyloseq/ps_metab_P.rds", "./data/ancombc2_metab_P.rds")
+fname_PV <- c("./data/phyloseq/ps_metab_PV.rds", "./data/ancombc2_metab_PV.rds")
 
 run_ancom <- function(fname_in, fname_out) {
   ps <- readRDS(fname_in) 

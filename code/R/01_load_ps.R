@@ -11,7 +11,7 @@ suppressPackageStartupMessages({
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, cache = TRUE)
 
 # load phyloseq object (absolute counts)
-ps <- readRDS("./data/ps_genus_subset.rds")
+ps <- readRDS("./data/phyloseq/ps_genus_subset.rds")
 
 # Metabolism input file
 metab_fname <- "./data/metabolism_midas.xlsx"

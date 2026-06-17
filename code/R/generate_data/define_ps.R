@@ -74,10 +74,10 @@ ps_genus = tax_glom(ps_filt, "Genus")
 
 # ------ Save ------
 
-saveRDS(ps_filt,        file = "./data/ps_ASV_full.rds")
-saveRDS(ps_genus,       file = "./data/ps_genus_full.rds")
+saveRDS(ps_filt,        file = "./data/phyloseq/ps_ASV_full.rds")
+saveRDS(ps_genus,       file = "./data/phyloseq/ps_genus_full.rds")
 
 # remove XS granules
 ps_sub <- subset_samples(ps_genus, size.name != "floccular")
   
-saveRDS(ps_sub, file = "./data/ps_genus_subset.rds")
+saveRDS(ps_sub, file = "./data/phyloseq/ps_genus_subset.rds")

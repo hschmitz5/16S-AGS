@@ -2,7 +2,7 @@ rm(list = ls())
 library(vegan)
 
 # load phyloseq object for all sample sizes
-ps_full <- readRDS("./data/ps_ASV_full.rds") 
+ps_full <- readRDS("./data/phyloseq/ps_ASV_full.rds") 
 
 metadata <- data.frame(sample_data(ps_full)) %>%
   tibble::rownames_to_column("Sample") %>%
