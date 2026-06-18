@@ -35,6 +35,7 @@ p1 <- ggplot(DA_df, aes(x = size, y = lfc, fill = metab_val)) +
     x = "Size"
     ) +
   scale_fill_manual(
+    name = "Functional Group",
     values = c("Positive" = "steelblue",
                "Positive + Variable" = "lightgray")
   )
@@ -53,6 +54,7 @@ p2 <- ggplot(rel_ab_df, aes(x = size.name, y = mean_sum, fill = metab_val)) +
     x = "Size"
   ) +
   scale_fill_manual(
+    name = "Functional Group",
     values = c("Positive" = "steelblue",
                "Positive + Variable" = "lightgray")
   )
@@ -61,15 +63,7 @@ p2 <- ggplot(rel_ab_df, aes(x = size.name, y = mean_sum, fill = metab_val)) +
 p <- p1 + p2 +
   plot_layout(guides = "collect") & 
   theme_minimal(base_size = 12) +
-  theme(legend.position = "bottom",
-        legend.title = element_blank()) &
-  guides(
-    color = guide_legend(
-      title.position = "bottom",
-      title.hjust = 0.5 # centers title
-    )
-  ) 
-
+  theme(legend.position = "bottom") 
 
 # Save plot
 fname <- "./figures/metabolism.png"
