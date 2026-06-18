@@ -19,6 +19,8 @@ txt_fname <- "./figures/ANOSIM.txt"
 anosim_summary <- capture.output(summary(ps.ano))
 writeLines(anosim_summary, con = txt_fname)
 
+print(anosim_summary)
+
 # ------- Plot --------
 
 # Define a base font size in points
