@@ -31,7 +31,7 @@ p1 <- ggplot(DA_df, aes(x = size, y = lfc, fill = metab_val)) +
   ylim(min_y, max_y) +
   labs(
     title = "Differential Abundance",
-    y = "Log fold-change (relative to S)",
+    y = "Log Fold-Change (Relative to S)",
     x = "Size"
     ) 
 
@@ -45,7 +45,7 @@ p2 <- ggplot(rel_ab_df, aes(x = size.name, y = mean_sum, fill = metab_val)) +
   facet_wrap(~metab, scales = "free_y", ncol = 1) +
   labs(
     title = "Relative Abundance",
-    y = "Percent of sample",
+    y = "Percent of Sample",
     x = "Size"
   ) 
 
