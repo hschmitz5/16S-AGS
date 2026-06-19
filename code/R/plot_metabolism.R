@@ -30,15 +30,10 @@ p1 <- ggplot(DA_df, aes(x = size, y = lfc, fill = metab_val)) +
   facet_wrap(~metab, scales = "fixed", ncol = 1) +
   ylim(min_y, max_y) +
   labs(
-    title = "Between Sample Abundance",
+    title = "Differential Abundance",
     y = "Log fold-change (relative to S)",
     x = "Size"
-    ) +
-  scale_fill_manual(
-    name = "Functional Group",
-    values = c("Positive" = "steelblue",
-               "Positive + Variable" = "lightgray")
-  )
+    ) 
 
 p2 <- ggplot(rel_ab_df, aes(x = size.name, y = mean_sum, fill = metab_val)) +
   geom_col(position = "dodge", width = 0.6) +
@@ -49,22 +44,23 @@ p2 <- ggplot(rel_ab_df, aes(x = size.name, y = mean_sum, fill = metab_val)) +
   ) +
   facet_wrap(~metab, scales = "free_y", ncol = 1) +
   labs(
-    title = "Within Sample Abundance",
-    y = "Relative Abundance (%)",
+    title = "Relative Abundance",
+    y = "Percent of sample",
     x = "Size"
-  ) +
+  ) 
+
+p <- p1 + p2 +
+  # Combine legends
+  plot_layout(guides = "collect") & 
   scale_fill_manual(
     name = "Functional Group",
     values = c("Positive" = "steelblue",
                "Positive + Variable" = "lightgray")
-  )
-
-
-p <- p1 + p2 +
-  plot_layout(guides = "collect") & 
+  ) &
   theme_minimal(base_size = 12) +
-  theme(legend.position = "bottom") 
-
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = "bottom") 
+  
 # Save plot
 fname <- "./figures/metabolism.png"
 ggsave(fname, plot = p, width = 6.5, height = 6, dpi = 300)
