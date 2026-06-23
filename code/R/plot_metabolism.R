@@ -8,7 +8,7 @@ source("./code/R/02_join_rel_ab_and_function.R")
 
 write2excel <- 0
 
-metab_order <- c("GAO", "Filamentous", "AOB")
+metab_order <- c("GAO", "PAO", "AOB", "NOB", "Filamentous")
 n_rows <- length(metab_order)
 
 DA_df <- readRDS("./data/DA/DA_metab_processed.rds") %>%
@@ -25,18 +25,7 @@ rel_ab_df <- join_rel_ab_and_function(ps) %>%
 min_y = floor(min(DA_df$lfc))
 max_y = ceiling(max(DA_df$lfc))
 
-p1 <- ggplot(DA_df, aes(x = size, y = lfc, fill = metab_val)) +
-  geom_col(position = "dodge", width = 0.6) +
-  geom_hline(yintercept = 0, linewidth = 0.5, color = "darkgray") +  # bold y = 0
-  facet_wrap(~metab, scales = "fixed", ncol = 1) +
-  ylim(min_y, max_y) +
-  labs(
-    title = "Differential Abundance",
-    y = "Log Fold-Change (Relative to S)",
-    x = "Size"
-    ) 
-
-p2 <- ggplot(rel_ab_df, aes(x = size.name, y = mean_sum, fill = metab_val)) +
+p1 <- ggplot(rel_ab_df, aes(x = size.name, y = mean_sum, fill = metab_val)) +
   geom_col(position = "dodge", width = 0.6) +
   geom_errorbar(
     aes(ymin = mean_sum - sd_sum, ymax = mean_sum + sd_sum),
@@ -49,6 +38,17 @@ p2 <- ggplot(rel_ab_df, aes(x = size.name, y = mean_sum, fill = metab_val)) +
     y = "Percent of Sample",
     x = "Size"
   ) 
+
+p2 <- ggplot(DA_df, aes(x = size, y = lfc, fill = metab_val)) +
+  geom_col(position = "dodge", width = 0.6) +
+  geom_hline(yintercept = 0, linewidth = 0.5, color = "darkgray") +  # bold y = 0
+  facet_wrap(~metab, scales = "fixed", ncol = 1) +
+  ylim(min_y, max_y) +
+  labs(
+    title = "Differential Abundance",
+    y = "Log Fold-Change (Relative to S)",
+    x = "Size"
+    ) 
 
 p <- p1 + p2 +
   # Combine legends
@@ -64,7 +64,7 @@ p <- p1 + p2 +
   
 # Save plot
 fname <- "./figures/metabolism.png"
-ggsave(fname, plot = p, width = 6.5, height = 6, dpi = 300)
+ggsave(fname, plot = p, width = 6.5, height = 7.5, dpi = 300)
 
 
 
