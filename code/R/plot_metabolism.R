@@ -76,7 +76,7 @@ if (write2excel == 1) {
   rel_wide <- get_rel_wide(ps) %>%
     rownames_to_column(var = "Genus")
   
-  new_m <- get_metabolism(rel_wide, metab_fname) %>%
+  new_m <- get_metabolism(rel_wide) %>%
     # true if any metabolic groups in row are defined
     mutate(tf = as.integer(if_any(everything(), ~ !is.na(.x)))) %>%
     rownames_to_column(var = "Genus")
