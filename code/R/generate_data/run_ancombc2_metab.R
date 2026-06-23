@@ -51,9 +51,6 @@ process_DA <- function(output, value_col) {
     dplyr::arrange(metab)
   
   df_robust <- res_prim %>%
-    # filter for values that are differentially abundant (TRUE)
-    dplyr::filter(diff_size.nameM == 1 | diff_size.nameL == 1 |
-                    diff_size.nameXL == 1 | diff_size.nameXXL == 1) %>%
     # true if robust (is differentially abundant and passed sensitivity analysis)
     dplyr::mutate(M = ifelse(diff_robust_size.nameM == 1, 
                              TRUE, FALSE),
