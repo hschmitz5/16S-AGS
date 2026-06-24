@@ -53,7 +53,6 @@ p <- ggplot(modulus, aes(x = freq_rad, y = avg, color = size)) +
 fname_out <- "./figures/moduli.png"
 ggsave(fname_out, plot = p, width = 6.5, height = 2.25, dpi = 300)
 
-
 p_sub <- ggplot(modulus_subset, aes(x = size, y = avg, fill = measure)) +
   geom_col(position = "dodge", width = 0.6) +
   geom_errorbar(
@@ -67,7 +66,7 @@ p_sub <- ggplot(modulus_subset, aes(x = size, y = avg, fill = measure)) +
     y = "Modulus (Pa)"
   ) +
   scale_fill_manual(
-    values = c("#765DA0", "lightgray")
+    values = c("peachpuff4", "peachpuff")
   ) +
   theme_minimal(base_size = 12) +
   theme(
