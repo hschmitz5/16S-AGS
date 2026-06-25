@@ -44,7 +44,7 @@ p <- ggplot(modulus, aes(x = freq_rad, y = avg, color = size)) +
     values = met.brewer(size_pal, n_sizes)
   ) +
   labs(
-    x = "Frequency (rad/s)",
+    x = "Deformation Frequency (rad/s)",
     y = "Modulus (Pa)",
   ) +
   theme_minimal(base_size = 12) +
@@ -61,7 +61,7 @@ p_sub <- ggplot(modulus_subset, aes(x = size, y = avg, fill = measure)) +
     position = position_dodge(width = 0.6)
   ) +
   labs(
-    title = "Frequency = 0.1 rad/s",
+    title = "Deformation Frequency = 0.1 rad/s",
     x = "Size",
     y = "Modulus (Pa)"
   ) +
