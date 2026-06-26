@@ -23,13 +23,13 @@ PS <- group_data(fname_polys)
 
 # Combine into single data frame
 df <- bind_rows(
-  Protein = PN,
-  Polysaccharide = PS,
+  'Protein (PN)' = PN,
+  'Polysaccharide (PS)' = PS,
   .id = "assay"
   ) %>%
   mutate(
     extract = recode(extract,"LB" = "Loosely Bound","TB" = "Tightly Bound"),
-    assay = factor(assay, levels = c("Protein", "Polysaccharide"))
+    assay = factor(assay, levels = c("Protein (PN)", "Polysaccharide (PS)"))
     ) 
 
 # Calculate PN/PS
@@ -64,18 +64,18 @@ p <- ggplot(data = df, aes(x = size, y = avg, fill = assay)) +
   geom_point(
     data = df_wide, aes(x = size, y = total, color = "Total EPS"), 
     inherit.aes = FALSE, shape = 20) +
-  facet_wrap(~extract, nrow=1, strip.position = "top") +
+  facet_wrap(~extract) + 
   ylim(0, max_y) +
   labs(
     x = "Size",
-    y = expression(paste(mu, "g/mgTSS")),
-    color = NULL,
-    fill = NULL
+    y = expression(paste(mu, "g/mgVSS")),
+    fill = NULL, # legend titles
+    color = NULL 
   ) +
   scale_fill_manual(
     values = c(
-      "Protein" = "gray",
-      "Polysaccharide" = "lightblue"
+      "Protein (PN)" = "gray",
+      "Polysaccharide (PS)" = "lightblue"
     )
   ) +
   scale_color_manual(
@@ -83,6 +83,7 @@ p <- ggplot(data = df, aes(x = size, y = avg, fill = assay)) +
   ) +
   theme_minimal(base_size = 12) +
   theme(
+    legend.position = "top",
     strip.background = element_rect(
       fill = "white",      # facet label fill
       colour = "lightgray" # facet label outline
@@ -112,4 +113,4 @@ p2 <- p / annot +
   plot_layout(heights = c(4, 1)) 
 
 fname_out <- "./figures/EPS.png"
-ggsave(fname_out, plot = p2, width = 8, height = 4, dpi = 600)
+ggsave(fname_out, plot = p2, width = 6.5, height = 4, dpi = 600)
