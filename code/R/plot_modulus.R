@@ -22,7 +22,7 @@ modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
   mutate(
     size = factor(size, levels = sz$name),
     measure = factor(measure, levels = c("G", "G2")),
-    measure = recode(measure,"G"="Storage Modulus (G')","G2"='Loss Modulus (G")')
+    measure = recode(measure,"G"="Storage Modulus","G2"="Loss Modulus")
     )
 
 modulus_subset <- modulus %>%
