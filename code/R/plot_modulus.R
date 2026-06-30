@@ -3,11 +3,11 @@ library(readxl)
 library(tidyverse)
 library(patchwork)
 library(MetBrewer)
-source("./code/R/01_load_ps.R")
 
 # define sample names
 sz <- data.frame(
-  name = c("S", "M", "L", "XL", "XXL")
+  name = c("S", "M", "L", "XL", "XXL"),
+  midpoint = c(1.125, 1.7, 2.4, 3.4, 4.5)
 )
 
 fname_in <- "./data/Rheometry_Nov_2024.xlsx"
@@ -28,6 +28,12 @@ modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
 modulus_subset <- modulus %>%
   filter(freq_rad == 0.1) %>%
   select(-freq_rad) 
+
+mod_storage <- modulus_subset %>% filter(measure == "Storage Modulus")
+mod_loss <- modulus_subset %>% filter(measure == "Loss Modulus")
+
+res_storage <- cor.test(mod_storage$avg, sz$midpoint, method = "spearman")
+res_loss <- cor.test(mod_storage$avg, sz$midpoint, method = "spearman")
 
 #### Plot
 
