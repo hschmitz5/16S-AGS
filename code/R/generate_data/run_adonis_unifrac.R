@@ -59,7 +59,7 @@ df_R2 <- df %>%
 fname_out <- "./data/ADONIS_UniFrac.xlsx"
 write_xlsx(df_R2, path = fname_out)
 
-# ------ Overall ADONIS ------
+# ------ Overall Result ------
 
 metadata <- data.frame(sample_data(ps))
 
@@ -70,3 +70,30 @@ res <- adonis2(
   data = metadata,
   permutations = 999
 )
+
+# ------ Plot ------
+
+df_long <- df_R2 |>
+  pivot_longer(!sz_1, names_to = "sz_2", values_to = "R2")
+
+df_long$sz_1 <- factor(df_long$sz_1, levels = rev(sizes))
+df_long$sz_2 <- factor(df_long$sz_2, levels = sizes)
+  
+p <- ggplot(data = df_long, aes(x = sz_2, y = sz_1, fill = R2)) +
+  geom_tile() + 
+  geom_text(aes(label = round(R2,2))) +
+  scale_fill_gradient(
+    low = "white",
+    high = "steelblue",
+    na.value = "white"
+  ) +
+  labs(
+    title = expression(paste("ADONIS ", R^2)),
+    x = NULL,
+    y = NULL
+  ) +
+  theme_classic(base_size = 12) +
+  theme(legend.position = "none")
+
+fname <- "./figures/adonis.png"
+ggsave(fname, plot = p, width = 6.5, height = 3, dpi = 300)
