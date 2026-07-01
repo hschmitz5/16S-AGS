@@ -22,6 +22,7 @@ pcoa <- data.frame(axis1 = ps.ord$vectors[, "Axis.1"]) %>%
   rownames_to_column(var = "Sample") %>%
   left_join(., metadata, by = "Sample") %>%
   group_by(size.name, size.midpoint) %>%
+  # correlate mean of Axis 1
   summarize(
     axis1_mean = mean(axis1),
     .groups = "drop"
