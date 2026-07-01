@@ -42,7 +42,12 @@ p <- ggplot(nmds_df, aes(NMDS1, NMDS2, color = size.name, shape = size.name)) +
   scale_color_manual(values = cols) +
   scale_shape_manual(values = shapes) +
   scale_fill_manual(values = cols) +
-  labs(shape = "Size", color = "Size", fill = "Size") +
+  labs(
+    x = "Axis 1", 
+    y = "Axis 2",
+    shape = "Size", 
+    color = "Size", 
+    fill = "Size") +
   theme_classic(base_size = 12) 
 
 fname <- "./figures/ordination_NMDS.png"
