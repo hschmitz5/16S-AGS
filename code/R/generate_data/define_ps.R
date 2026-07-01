@@ -26,13 +26,18 @@ ps@sam_data$size.midpoint <- size$midpoint[as.numeric(ps@sam_data$size.mm)]
   
 # ------ Filter ------
 
-ps_filt <- phyloseq::subset_taxa(ps,
-                                 # remove unclassified sequences
-                                 (Kingdom != "Unassigned") &
-                                 # remove Chloroplasts and Mitochondria
-                                 (Order != "Chloroplast") &
-                                 (Family != "Mitochondria")
+remove_names <- taxa_names(
+  subset_taxa(
+    ps,
+    Kingdom == "Unassigned" |    
+      Order == "Chloroplast" |
+      Family == "Mitochondria"
+  )
 )
+
+keep_taxa <- !(taxa_names(ps) %in% remove_names)
+
+ps_filt <- prune_taxa(keep_taxa, ps)
 
 # ------ Rarefy ------
 
@@ -42,9 +47,6 @@ rarefy_level <- min(sample_sums(ps_filt))  # lowest number of ASVs per sample
 ps_rare <- rarefy_even_depth(
   ps_filt, rarefy_level, rngseed = 1, replace = FALSE, trimOTUs = TRUE, verbose = TRUE
 )
-
-# Prune the tree to match the remaining taxa
-ps_rare <- prune_taxa(taxa_names(ps_rare), ps_rare)
 
 # ------ Save at ASV level ------
 
