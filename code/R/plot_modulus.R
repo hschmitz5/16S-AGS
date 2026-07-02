@@ -21,6 +21,8 @@ modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
     names_pattern = "(G2?|G2?)_(avg|sd)"
   ) %>%
   mutate(
+    avg = avg/1000, 
+    sd = sd/1000,
     size = factor(size, levels = sz$name),
     measure = factor(measure, levels = c("G", "G2")),
     measure = recode(measure,"G"="Storage Modulus","G2"="Loss Modulus")
@@ -54,7 +56,7 @@ p <- ggplot(modulus, aes(x = freq_rad, y = avg, color = size)) +
   ) +
   labs(
     x = "Frequency (rad/s)",
-    y = "Modulus (Pa)",
+    y = "Modulus (kPa)",
   ) +
   theme_classic(base_size = 12) +
   theme(
@@ -77,7 +79,7 @@ p_sub <- ggplot(modulus_subset, aes(x = size, y = avg, fill = measure)) +
   labs(
     title = "Frequency = 0.1 rad/s",
     x = "Size",
-    y = "Modulus (Pa)"
+    y = "Modulus (kPa)"
   ) +
   scale_fill_manual(
     values = c("plum4", "lightgray")
