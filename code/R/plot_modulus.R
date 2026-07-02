@@ -21,8 +21,10 @@ modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
     names_pattern = "(G2?|G2?)_(avg|sd)"
   ) %>%
   mutate(
+    # convert units to kPa (originally in Pa)
     avg = avg/1000, 
     sd = sd/1000,
+    # change display names and order
     size = factor(size, levels = sz$name),
     measure = factor(measure, levels = c("G", "G2")),
     measure = recode(measure,"G"="Storage Modulus","G2"="Loss Modulus")
