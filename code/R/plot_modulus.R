@@ -3,6 +3,7 @@ library(readxl)
 library(tidyverse)
 library(patchwork)
 library(MetBrewer)
+source("./code/R/01_load_ps.R")
 
 # define sample names
 sz <- data.frame(
@@ -50,7 +51,7 @@ p <- ggplot(modulus, aes(x = freq_rad, y = avg, color = size)) +
     values = met.brewer(size_pal, n_sizes)
   ) +
   labs(
-    x = "Deformation Frequency (rad/s)",
+    x = "Frequency (rad/s)",
     y = "Modulus (Pa)",
   ) +
   theme_classic(base_size = 12) +
@@ -72,7 +73,7 @@ p_sub <- ggplot(modulus_subset, aes(x = size, y = avg, fill = measure)) +
     position = position_dodge(width = 0.6)
   ) +
   labs(
-    title = "Deformation Frequency = 0.1 rad/s",
+    title = "Frequency = 0.1 rad/s",
     x = "Size",
     y = "Modulus (Pa)"
   ) +
