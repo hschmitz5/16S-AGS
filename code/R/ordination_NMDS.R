@@ -2,7 +2,6 @@ rm(list = ls())
 library(phyloseq)
 library(tidyverse)
 library(vegan)
-library(writexl)
 source("./code/R/01_load_ps.R")
 
 # load phyloseq object for all sample sizes
