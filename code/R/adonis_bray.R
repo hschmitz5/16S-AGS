@@ -115,30 +115,29 @@ write_xlsx(
 
 # ------ Plot ------
 
-df_long <- df_R2 |>
-  pivot_longer(!sz_1, names_to = "sz_2", values_to = "R2") %>%
-  mutate(sz_1 = recode(sz_1, "floccular" = "Floccular"))
+df_long <- df_bd |>
+  pivot_longer(!sz_1, names_to = "sz_2", values_to = "bd") 
 
 df_long$sz_1 <- factor(df_long$sz_1, levels = rev(sizes))
 df_long$sz_2 <- factor(df_long$sz_2, levels = sizes)
 
-p <- ggplot(data = df_long, aes(x = sz_2, y = sz_1, fill = R2)) +
+p <- ggplot(data = df_long, aes(x = sz_2, y = sz_1, fill = bd)) +
   geom_tile() + 
-  geom_text(aes(label = round(R2,2))) +
+  geom_text(aes(label = round(bd,2))) +
   scale_fill_gradient(
     low = "white",
     high = "steelblue",
     na.value = "white"
   ) +
   labs(
-    title = expression(paste("Permutational MANOVA ", R^2)),
+    title = "Group Dispersions",
     x = NULL,
     y = NULL
   ) +
   theme_classic(base_size = 12) +
   theme(legend.position = "none")
 
-fname <- "./figures/ADONIS_Bray_R2.png"
+fname <- "./figures/betadisper_Bray.png"
 ggsave(fname, plot = p, width = 6.5, height = 3, dpi = 300)
 
 # ------ Look at distance matrix ------
