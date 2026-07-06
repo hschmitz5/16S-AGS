@@ -90,8 +90,7 @@ write_xlsx(
 # ------ Plot ------
 
 df_long <- df_p |>
-  pivot_longer(!sz_1, names_to = "sz_2", values_to = "p_val") %>%
-  mutate(sz_1 = recode(sz_1, "floccular" = "Floccular"))
+  pivot_longer(!sz_1, names_to = "sz_2", values_to = "p_val") 
 
 df_long$sz_1 <- factor(df_long$sz_1, levels = rev(sizes))
 df_long$sz_2 <- factor(df_long$sz_2, levels = sizes)
