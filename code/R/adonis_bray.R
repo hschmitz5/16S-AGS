@@ -130,7 +130,7 @@ p <- ggplot(data = df_long, aes(x = sz_2, y = sz_1, fill = bd)) +
     na.value = "white"
   ) +
   labs(
-    title = "Group Dispersions",
+    title = "Group Dispersion p-values",
     x = NULL,
     y = NULL
   ) +
