@@ -8,7 +8,7 @@ sam_name <- c("20A", "20B", "20C", "14A", "14B", "14C", "10A", "10B", "10C",
               "7A", "7B", "7C", "5A", "5B", "5C")
 
 # load phyloseq object (absolute counts)
-ps <- readRDS("./data/ps_genus_subset.rds")
+ps <- readRDS("./data/phyloseq/ps_genus_subset.rds")
 
 taxonomy <- data.frame(tax_table(ps)) %>%
   dplyr::select(Genus) %>%
