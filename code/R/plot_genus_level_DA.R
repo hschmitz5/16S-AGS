@@ -125,5 +125,5 @@ png(fname,
     height = 6.5, # height in inches; can adjust
     units = "in", res = 300)
 draw(ht, heatmap_legend_side = "top") #, annotation_legend_side = "top") 
-draw(lgd, x = unit(0.66, "npc"), y = unit(0.98, "npc"), just = c("right", "top"))
+draw(lgd, x = unit(0.7, "npc"), y = unit(0.98, "npc"), just = c("right", "top"))
 dev.off()
