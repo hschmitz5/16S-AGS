@@ -42,6 +42,7 @@ df <- bind_rows(
   ) %>%
   mutate(
     extract = recode(extract,"LB" = "Loosely Bound","TB" = "Tightly Bound"),
+    extract = factor(extract, levels = c("Tightly Bound", "Loosely Bound")),
     assay = factor(assay, levels = c("Polysaccharide (PS)", "Protein (PN)", "Total EPS (PN + PS)"))
     ) 
 
@@ -111,8 +112,8 @@ p <- ggplot(data = df, aes(x = size, y = avg, fill = assay)) +
     position = position_dodge(width = 0.8),
     width = 0.2
   ) +
-  facet_wrap(~extract) + 
-  ylim(0, max_y) +
+  facet_wrap(~extract, scales = "free_y") + 
+  # ylim(0, max_y) +
   labs(
     y = expression(paste(mu, "g/mgVSS")),
     x = NULL,
