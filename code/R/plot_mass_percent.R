@@ -2,7 +2,7 @@ source("./code/R/01_load_ps.R")
 
 # Data -------------------------------------------------------------
 
-labels <- c("< 0.21", "0.21 - 0.43", "0.43 - 0.60", "0.60 - 1.4", 
+legend_labels <- c("< 0.21", "0.21 - 0.43", "0.43 - 0.60", "0.60 - 1.4", 
             "1.4 - 2.0", "2.0 - 2.8", "2.8 - 4.0", "> 4.0")
 
 x_edges <- c(0, 0.21, 0.43, 0.60, 1.4, 2.0, 2.8, 4.0, 5.0)   # sieve boundaries
@@ -16,7 +16,7 @@ df <- data.frame(
   xmax = x_edges[-1],                # removes first element 
   ymin = 0,
   ymax = mass_percent,
-  label = factor(labels, levels = labels),
+  label = factor(legend_labels, levels = legend_labels),
   color = colors 
 )
 
@@ -30,8 +30,8 @@ p <- ggplot(df) +
   scale_fill_manual(values = colors) +
   # control x-axis tick labels
   scale_x_continuous(
-    breaks = x_edges[-length(x_edges)],
-    labels = x_edges[-length(x_edges)]
+    breaks = x_edges[-c(2, 3, length(x_edges))], # rewove these indices
+    labels = x_edges[-c(2, 3, length(x_edges))]
   ) +
   labs(
     x = "Biomass Size (mm)",
@@ -40,18 +40,14 @@ p <- ggplot(df) +
   ) +
   theme_classic(base_size = 14) +
   theme(
-    legend.position = "top",
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    panel.grid.minor.x = element_blank()
-  ) +
-  guides(
-    fill = guide_legend(byrow = TRUE)
-  )
+    legend.key.spacing.y = unit(0.1, "cm"),
+    legend.text = element_text(size = 10)
+  ) 
 
 # Save figure -------------------------------------------------------
 
 fname <- "./figures/mass-percent.png"
-ggsave(fname, p, width = 6, height = 5, dpi = 300)
+ggsave(fname, p, width = 6.5, height = 3.5, dpi = 300)
 
 # Display
 print(p)
