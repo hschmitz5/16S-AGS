@@ -40,19 +40,9 @@ keep_taxa <- !(taxa_names(ps) %in% remove_names)
 
 ps_filt <- prune_taxa(keep_taxa, ps)
 
-# ------ Rarefy ------
-
-# define minimum depth to rarefy
-rarefy_level <- min(sample_sums(ps_filt))  # lowest number of ASVs per sample
-
-ps_rare <- rarefy_even_depth(
-  ps_filt, rarefy_level, rngseed = 1, replace = FALSE, trimOTUs = TRUE, verbose = TRUE
-)
-
 # ------ Save at ASV level ------
 
 saveRDS(ps_filt, file = "./data/phyloseq/ps_ASV.rds")
-saveRDS(ps_rare, file = "./data/phyloseq/ps_ASV_rarefied.rds")
 
 # ------ Agglomerate, keeping NA values  ------
 

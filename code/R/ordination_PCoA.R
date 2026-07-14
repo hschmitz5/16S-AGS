@@ -4,7 +4,16 @@ source("./code/R/01_load_ps.R")
 dist_method <- "wunifrac" # "bray"
 
 # load phyloseq object for all sample sizes
-ps <- readRDS("./data/phyloseq/ps_ASV_rarefied.rds") 
+ps <- readRDS("./data/phyloseq/ps_ASV.rds") 
+
+# ------ Rarefy ------
+
+# define minimum depth to rarefy
+rarefy_level <- min(sample_sums(ps))  # lowest number of ASVs per sample
+
+ps_rare <- rarefy_even_depth(
+  ps, rarefy_level, rngseed = 1, replace = FALSE, trimOTUs = TRUE, verbose = TRUE
+)
 
 # Converting tree to binary resolves tip number error
 # if (ape::is.binary(phy_tree(ps)) == "FALSE") {
@@ -13,12 +22,12 @@ ps <- readRDS("./data/phyloseq/ps_ASV_rarefied.rds")
 # }
 
 # ps: all sample groups
-ps.ord <- ordinate(ps, "PCoA", dist_method) 
+ps.ord <- ordinate(ps_rare, "PCoA", dist_method) 
 
 # ------ Correlation ------
 
 # For correlation
-metadata <- get_metadata(ps) 
+metadata <- get_metadata(ps_rare) 
 
 pcoa <- data.frame(axis1 = ps.ord$vectors[, "Axis.1"]) %>%
   rownames_to_column(var = "Sample") %>%
@@ -43,7 +52,7 @@ shapes <- c(16, 17, 15, 18, 3, 7)
 # colors
 cols <- c("gray", met.brewer(size_pal, n_sizes))
 
-p <- plot_ordination(ps, ps.ord, color="size.name", shape = "size.name") +
+p <- plot_ordination(ps_rare, ps.ord, color="size.name", shape = "size.name") +
   geom_polygon(alpha = 0.5, aes(fill = size.name)) +
   scale_color_manual(values = cols) +
   scale_shape_manual(values = shapes) +
