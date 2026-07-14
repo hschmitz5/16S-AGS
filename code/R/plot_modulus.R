@@ -1,5 +1,4 @@
 rm(list = ls())
-library(readxl)
 library(tidyverse)
 library(patchwork)
 library(MetBrewer)
