@@ -2,19 +2,30 @@ rm(list = ls())
 library(vegan)
 
 # load phyloseq object for all sample sizes
-ps <- readRDS("./data/phyloseq/ps_ASV_rarefied.rds") 
+ps <- readRDS("./data/phyloseq/ps_ASV.rds") 
+
+# ------ Rarefy ------
+
+# define minimum depth to rarefy
+rarefy_level <- min(sample_sums(ps))  # lowest number of ASVs per sample
+
+ps_rare <- rarefy_even_depth(
+  ps, rarefy_level, rngseed = 1, replace = FALSE, trimOTUs = TRUE, verbose = TRUE
+)
+
+rm(ps)
 
 # UniFrac expects a binary tree (each node to have 2 descendants)
-if (ape::is.binary(phy_tree(ps)) == "FALSE") {
-  phy_tree(ps) <- ape::multi2di(phy_tree(ps))
+if (ape::is.binary(phy_tree(ps_rare)) == "FALSE") {
+  phy_tree(ps_rare) <- ape::multi2di(phy_tree(ps_rare))
   print("resolved polytomies")
 }
 
-metadata <- data.frame(sample_data(ps)) %>%
+metadata <- data.frame(sample_data(ps_rare)) %>%
   tibble::rownames_to_column("Sample") %>%
   arrange(size.name)
 
-ps.dist <- distance(ps, method = "wunifrac" ) # weighted
+ps.dist <- distance(ps_rare, method = "wunifrac" ) # weighted
 invisible(ps.dist)
 #show(ps.dist)
 

@@ -5,13 +5,24 @@ library(vegan)
 library(writexl)
 
 # load phyloseq object for all sample sizes
-ps <- readRDS("./data/phyloseq/ps_ASV_rarefied.rds")
+ps <- readRDS("./data/phyloseq/ps_ASV.rds")
+
+# ------ Rarefy ------
+
+# define minimum depth to rarefy
+rarefy_level <- min(sample_sums(ps))  # lowest number of ASVs per sample
+
+ps_rare <- rarefy_even_depth(
+  ps, rarefy_level, rngseed = 1, replace = FALSE, trimOTUs = TRUE, verbose = TRUE
+)
+
+rm(ps)
 
 # ------ Overall Result ------
 
-metadata <- data.frame(sample_data(ps))
+metadata <- data.frame(sample_data(ps_rare))
 
-dist_matrix <- phyloseq::distance(ps, method = "wunifrac") 
+dist_matrix <- phyloseq::distance(ps_rare, method = "wunifrac") 
 
 overall_res <- adonis2(
   dist_matrix ~ size.name,
@@ -37,7 +48,7 @@ for (i in seq_along(all_combos)) {
   
   sample_pair <- all_combos[[i]]
   
-  ps_sub <- subset_samples(ps, size.name %in% sample_pair)
+  ps_sub <- subset_samples(ps_rare, size.name %in% sample_pair)
   # prune OTUs that do not exist in this pair
   ps_sub <- prune_taxa(taxa_sums(ps_sub) > 0, ps_sub)
   

@@ -15,9 +15,11 @@ ps_rare <- rarefy_even_depth(
   ps, rarefy_level, rngseed = 1, replace = FALSE, trimOTUs = TRUE, verbose = TRUE
 )
 
+rm(ps)
+
 # Converting tree to binary resolves tip number error
-# if (ape::is.binary(phy_tree(ps)) == "FALSE") {
-#   phy_tree(ps) <- ape::multi2di(phy_tree(ps))
+# if (ape::is.binary(phy_tree(ps_rare)) == "FALSE") {
+#   phy_tree(ps_rare) <- ape::multi2di(phy_tree(ps_rare))
 #   print("resolved polytomies")
 # }
 
