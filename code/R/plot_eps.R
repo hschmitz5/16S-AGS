@@ -123,15 +123,18 @@ p <- ggplot(df_all, aes(x = size, y = avg, fill = assay)) +
   ) +
   
   # Sizes
-  facet_grid(
+  ggh4x::facet_grid2(
     plot_type ~ extract,
-    scales = "free_y",
-    switch = "y"
+    scales = "free",
+    switch = "y",
+    independent = "y"
   ) +
   facetted_pos_scales(
     y = list(
-      scale_y_continuous(),                   # Concentration row
-      scale_y_continuous(breaks = c(0, 2, 4)) # PN/PS row
+      scale_y_continuous(),   
+      scale_y_continuous(), 
+      scale_y_continuous(breaks = c(0, 2, 4)), # PN/PS row
+      scale_y_continuous(breaks = c(0, 2, 4))  # PN/PS row
     )
   ) +
   force_panelsizes(rows = c(1, 1/3), cols = c(1, 1)) +
