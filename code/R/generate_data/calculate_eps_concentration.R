@@ -11,7 +11,7 @@ library(writexl)
 library(ggplot2)
 
 # change to process each sheet
-sheet_name <- "PS"  # protein (PN) or polysaccharide (PS)
+sheet_name <- "PN"  # protein (PN) or polysaccharide (PS)
 
 # File name for absorbance data
 fname_in   <- "./data/EPS/EPS_absorbance.xlsx"
@@ -41,7 +41,9 @@ sam <- df %>%
   # initialize data 
   mutate(
     C0 = NA_real_,
-    C_VSS = NA_real_) 
+    C_VSS = NA_real_,
+    C_TSS = NA_real_
+    ) 
 
 # set poly_degree based on sheet_name
 poly_degree <- switch(sheet_name,
@@ -70,6 +72,7 @@ for (d_set in unique(df$dataset)) {
   sam$C0[idx] <- predict(model, newdata = sam[idx,])
   # convert units to VSS
   sam$C_VSS[idx] <- sam$C0[idx]*extract_volume/sam$VSS[idx]
+  sam$C_TSS[idx] <- sam$C0[idx]*extract_volume/sam$TSS[idx]
   
   #### Plot Fit Data
   
@@ -111,10 +114,10 @@ for (d_set in unique(df$dataset)) {
 }
 
 sam_output <- sam %>%
-  dplyr::select(size, replicate, extract, C_VSS)
+  dplyr::select(size, replicate, extract, C_VSS, C_TSS)
 
 # save the sample data
-saveRDS(sam_output, file = paste0("./data/EPS/",sheet_name,"_conc.rds"))
+saveRDS(sam_output, file = paste0("./data/EPS/",sheet_name,"_conc_ags.rds"))
 
 sam_sort <- sam_output %>%
   arrange(extract)
