@@ -148,7 +148,7 @@ ht <- Heatmap(
 )
 
 # Figure output location
-fname_rel <- "./figures/genus_level_rel_ab.png"
+fname_rel <- "./figures/genus_level_rel_ab_LEFT.png"
 
 # Draw combined heatmap
 png(fname_rel,
