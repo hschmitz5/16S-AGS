@@ -44,13 +44,13 @@ df_conc <- bind_rows(
   'Total EPS (PN + PS)' = df_wide %>% select(extract, size, avg = total, sd),
   .id = "assay"
   ) %>%
-  mutate(plot_type = "\u00b5g/mgTSS") %>%
+  mutate(plot_type = "\u00b5g/mgVSS") %>%
   select(plot_type, assay, extract, size, avg, sd) 
 
 # Calculate PN/PS
 PNPS <- df_wide %>% 
   mutate(
-    plot_type = "PN/PS",
+    plot_type = NA, # unitless
     assay = "PN/PS",
     sd = NA
   ) %>%
