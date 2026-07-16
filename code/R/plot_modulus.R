@@ -13,7 +13,7 @@ sz <- data.frame(
 
 fname_in <- "./data/Rheometry_Nov_2024.xlsx"
 modulus <- read_excel(fname_in, sheet = "input", skip = 1) %>%
-  filter(size != "XS") %>%
+  filter(size != "Floccular") %>%
   select(size, freq_rad, G_avg, G_sd, G2_avg, G2_sd) %>%
   pivot_longer(
     cols = c(G_avg, G_sd, G2_avg, G2_sd),
