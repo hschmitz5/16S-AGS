@@ -44,13 +44,13 @@ df_conc <- bind_rows(
   'Total EPS (PN + PS)' = df_wide %>% select(extract, size, avg = total, sd),
   .id = "assay"
   ) %>%
-  mutate(plot_type = "\u00b5g/mgVSS") %>%
+  mutate(plot_type = "Concentration") %>%  # \u00b5g/mgVSS
   select(plot_type, assay, extract, size, avg, sd) 
 
 # Calculate PN/PS
 PNPS <- df_wide %>% 
   mutate(
-    plot_type = NA, # unitless
+    plot_type = "PN/PS", # unitless
     assay = "PN/PS",
     sd = NA
   ) %>%
@@ -58,6 +58,7 @@ PNPS <- df_wide %>%
 
 df_all <- bind_rows(df_conc, PNPS) %>%
   mutate(
+    plot_type = factor(plot_type, levels = c("Concentration", "PN/PS"), labels = c("\u00b5g/mgVSS", NA)),
     assay = factor(assay, levels = c("Polysaccharide (PS)", "Protein (PN)", "Total EPS (PN + PS)", "PN/PS"))
   )
 
