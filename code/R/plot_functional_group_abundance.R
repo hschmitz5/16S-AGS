@@ -9,7 +9,6 @@ source("./code/R/02_sum_rel_ab_by_function.R")
 write2excel <- 0
 
 metab_order <- c("GAO", "PAO", "Filamentous")
-n_rows <- length(metab_order)
 
 DA_df <- readRDS("./data/DA/DA_metab_processed.rds") %>%
   mutate(metab = factor(metab, levels = metab_order))
