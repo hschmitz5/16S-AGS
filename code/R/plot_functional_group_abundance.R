@@ -4,7 +4,7 @@
 rm(list = ls())
 library(patchwork)
 source("./code/R/01_load_ps.R")
-source("./code/R/02_join_rel_ab_and_function.R")
+source("./code/R/02_sum_rel_ab_by_function.R")
 
 write2excel <- 0
 
