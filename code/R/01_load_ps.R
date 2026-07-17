@@ -2,8 +2,6 @@ suppressPackageStartupMessages({
   # ---- Load Packages ----
   library(tidyverse)
   library(phyloseq)
-  # formatting figures
-  library(patchwork)
   # colors
   library(MetBrewer) 
 })
