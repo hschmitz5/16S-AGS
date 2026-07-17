@@ -22,7 +22,7 @@ extract_volume = 10 # mL
 # define sample names
 sz <- data.frame(
   sieve = c(40, 20, 14, 10, 7, 5),
-  name  = c("XS", "S", "M", "L", "XL", "XXL")
+  name  = c("Floccular", "S", "M", "L", "XL", "XXL")
 )
 
 # ----------------------------------------
