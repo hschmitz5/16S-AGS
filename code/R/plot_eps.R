@@ -3,8 +3,8 @@ library(tidyverse)
 library(ggh4x)
 
 # File names for concentration data
-fname_pn    <- paste0("./data/EPS/PN_conc.rds")
-fname_polys <- paste0("./data/EPS/PS_conc.rds")
+fname_pn    <- paste0("./data/EPS/PN_conc_ags.rds")
+fname_polys <- paste0("./data/EPS/PS_conc_ags.rds")
 
 # Calculate average and std of replicates
 group_data <- function(fname) {
@@ -44,21 +44,21 @@ df_conc <- bind_rows(
   'Total EPS (PN + PS)' = df_wide %>% select(extract, size, avg = total, sd),
   .id = "assay"
   ) %>%
-  mutate(plot_type = "Concentration") %>%  # \u00b5g/mgVSS
-  select(plot_type, assay, extract, size, avg, sd) 
+  mutate(y_label = "\u00b5g/mgVSS") %>%  # Concentration
+  select(y_label, assay, extract, size, avg, sd) 
 
 # Calculate PN/PS
 PNPS <- df_wide %>% 
   mutate(
-    plot_type = "PN/PS", # unitless
+    y_label = "", # unitless
     assay = "PN/PS",
     sd = NA
   ) %>%
-  select(plot_type, assay, extract, size, avg = PNPS, sd) 
+  select(y_label, assay, extract, size, avg = PNPS, sd) 
 
 df_all <- bind_rows(df_conc, PNPS) %>%
   mutate(
-    plot_type = factor(plot_type, levels = c("Concentration", "PN/PS"), labels = c("\u00b5g/mgVSS", NA)),
+    y_label = factor(y_label, levels = c("\u00b5g/mgVSS", "")),
     assay = factor(assay, levels = c("Polysaccharide (PS)", "Protein (PN)", "Total EPS (PN + PS)", "PN/PS"))
   )
 
@@ -106,12 +106,12 @@ p <- ggplot(df_all, aes(x = size, y = avg, fill = assay)) +
   
   # Concentration Plots
   geom_col(
-    data = subset(df_all, plot_type == "\u00b5g/mgTSS"),
+    data = subset(df_all, y_label == "\u00b5g/mgVSS"),
     position = "dodge",
     width = 0.8
   ) +
   geom_errorbar(
-    data = subset(df_all, plot_type == "\u00b5g/mgTSS"),
+    data = subset(df_all, y_label == "\u00b5g/mgVSS"),
     aes(ymin = avg - sd, ymax = avg + sd),
     position = position_dodge(width = 0.8),
     width = 0.2
@@ -119,13 +119,13 @@ p <- ggplot(df_all, aes(x = size, y = avg, fill = assay)) +
   
   # PN/PS plots
   geom_col(
-    data = subset(df_all, plot_type == "PN/PS"),
+    data = subset(df_all, y_label == ""),
     width = 0.5
   ) +
   
   # Sizes
   ggh4x::facet_grid2(
-    plot_type ~ extract,
+    y_label ~ extract,
     scales = "free",
     switch = "y",
     independent = "y"
