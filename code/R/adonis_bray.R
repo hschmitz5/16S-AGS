@@ -14,13 +14,13 @@ rarefy_level <- min(sample_sums(ps))  # lowest number of ASVs per sample
 
 metadata <- data.frame(sample_data(ps))
 # rows are samples, columns are OTUs
-otu_matrix <- data.frame(t(otu_table(ps)))
+otu_matrix_full <- data.frame(t(otu_table(ps)))
 
 set.seed(1)
-dist_matrix <- avgdist(otu_matrix, sample = rarefy_level, iterations = 10, dmethod = "bray")
+dist_matrix_full <- avgdist(otu_matrix_full, sample = rarefy_level, iterations = 10, dmethod = "bray")
 
 overall_res <- adonis2(
-  dist_matrix ~ size.name,
+  dist_matrix_full ~ size.name,
   data = metadata,
   permutations = 999
   ) %>%
@@ -28,7 +28,7 @@ overall_res <- adonis2(
 
 # Want Insignificant 
 overall_bd <- anova(
-  betadisper(dist_matrix, metadata$size.name)
+  betadisper(dist_matrix_full, metadata$size.name)
   )
 
 # ------ Pairwise Results ------
@@ -132,7 +132,7 @@ p <- ggplot(data = bd_long, aes(x = sz_2, y = sz_1, fill = bd)) +
     na.value = "white"
   ) +
   labs(
-    title = "Dispersion Homogeneity p-values",
+    title = expression("Dispersion Homogeneity " * italic(p) * "-values"), #"Dispersion Homogeneity p-values",
     x = NULL,
     y = NULL
   ) +
@@ -148,6 +148,6 @@ ggsave(fname, plot = p, width = 5.38, height = 3, dpi = 300)
 sam_name <- c("20A", "20B", "20C", "14A", "14B", "14C", "10A", "10B", "10C",
               "7A", "7B", "7C", "5A", "5B", "5C")
 
-dist_mat <- as.matrix(dist_matrix)
+dist_mat <- as.matrix(dist_matrix_full)
 dist_mat <- dist_mat[sam_name, sam_name] # order data
 dist_tbl <- as_tibble(dist_mat, rownames = "sample") 
