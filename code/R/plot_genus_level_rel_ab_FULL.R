@@ -4,7 +4,7 @@ library(circlize) # for colorRamp2
 source("./code/R/01_load_ps.R")
 
 # number of rows to show
-n_show <- 30 
+n_show <- 20 
 
 write2excel <- 0
 
@@ -160,7 +160,7 @@ ht <- Heatmap(
     labels = breaks_rel_display,
     title = "Relative Abundance", 
     title_position = "leftcenter-rot",
-    legend_height = unit(9, "cm")
+    legend_height = unit(7.5, "cm")
   ),
   # Annotations
   top_annotation = size_annot,
@@ -178,7 +178,7 @@ fname_rel <- "./figures/genus_level_rel_ab_FULL.png"
 # Draw combined heatmap
 png(fname_rel,
     width = 7.5,  # width in inches; can adjust
-    height = 7.5, # height in inches; can adjust
+    height = 5.25, # height in inches; can adjust
     units = "in", res = 300)
 draw(ht, heatmap_legend_side = "left") 
 # metabolism legend
