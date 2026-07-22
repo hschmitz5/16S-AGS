@@ -1,9 +1,13 @@
 rm(list = ls())
 library(ComplexHeatmap)
+library(circlize) # for colorRamp2
 source("./code/R/01_load_ps.R")
 
+# load phyloseq object (absolute counts)
+ps <- readRDS("./data/phyloseq/ps_genus_full.rds")
+
 # number of rows to show
-n_show <- 30
+n_show <- 30 
 
 write2excel <- 0
 
@@ -69,8 +73,8 @@ m_colors  <- c("P" = "#66C24A", "V" = "#EAEC3F")
 m_annot <- rowAnnotation(
   df = m_df,
   # column names
-  annotation_name_side = "bottom",
-  annotation_name_rot = -60,
+  annotation_name_side = "top",
+  annotation_name_rot = 90,
   # color
   col = col_list <- setNames(
     rep(list(m_colors), ncol(m_df)),
@@ -82,7 +86,8 @@ m_annot <- rowAnnotation(
 )
 # metabolism legend
 lgd <- Legend(
-  title = "Functional\nGroup",
+  title = "Functional Group",
+  # title_position = "leftcenter",
   labels = c("Positive", "Variable"),
   legend_gp = gpar(fill = m_colors),
   nrow = 2,
@@ -110,7 +115,14 @@ row_fontface <- ifelse(
 )
 
 # Legend Colors
-ht_colors <- met.brewer(taxa_pal, type = "continuous")
+ht_colors <- colorRamp2(
+  breaks <- seq(
+    -1.12, # min(log_mat)
+    max(log_mat),
+    length.out = 10
+  ), 
+  met.brewer(taxa_pal, 10)
+)
 # Display legend ticks
 break_values <- c(0, 0.1, 1, 10, 25) # %
 breaks_log_display <- log10(break_values + pseudo) # Log (%)
@@ -139,7 +151,7 @@ ht <- Heatmap(
     legend_height = unit(9, "cm")
   ),
   # Annotations
-  bottom_annotation = size_annot,
+  top_annotation = size_annot,
   right_annotation = m_annot, 
   # Display size
   width  = unit(n_cols * cell_w, "inches"),
@@ -149,16 +161,16 @@ ht <- Heatmap(
 )
 
 # Figure output location
-fname_rel <- "./figures/genus_level_rel_ab_LEFT.png"
+fname_rel <- "./figures/genus_level_rel_ab.png"
 
 # Draw combined heatmap
 png(fname_rel,
     width = 7,  # width in inches; can adjust
-    height = 7, # height in inches; can adjust
+    height = 7.5, # height in inches; can adjust
     units = "in", res = 300)
 draw(ht, heatmap_legend_side = "left") 
 # metabolism legend
-# draw(lgd, x = unit(0.03, "npc"), y = unit(0.2, "npc"), just = c("left", "top")) 
+draw(lgd, x = unit(0.93, "npc"), y = unit(0.95, "npc"), just = c("right", "top"))
 dev.off()
 
 ## Check what percent of relative abundance is included in plot
