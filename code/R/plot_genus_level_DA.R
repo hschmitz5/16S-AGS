@@ -56,8 +56,8 @@ m_colors  <- c("P" = "#66C24A", "V" = "#EAEC3F")
 m_annot <- rowAnnotation(
   df = m_df,
   # column names
-  annotation_name_side = "bottom",
-  annotation_name_rot = -60,
+  annotation_name_side = "top",
+  annotation_name_rot = 90,
   # color
   col = col_list <- setNames(
     rep(list(m_colors), ncol(m_df)),
@@ -69,7 +69,7 @@ m_annot <- rowAnnotation(
 )
 # metabolism legend
 lgd <- Legend(
-  title = NULL,
+  title = "Functional Group",
   labels = c("Positive", "Variable"),
   legend_gp = gpar(fill = m_colors),
   nrow = 2,
@@ -96,18 +96,18 @@ breaks_display <- c(-3, -1.5, 0, 1.5, 3)
 ht <- Heatmap(
   data_mat,
   # columns
-  column_title = NULL, #"Differential Abundance (log fold change)", 
-  cluster_columns = FALSE, # changes sample order
+  column_names_side = "top",
   column_names_rot = 0,
   column_names_centered = TRUE,
+  cluster_columns = FALSE, # changes sample order
   # heatmap legend
   col = col_fun, 
   heatmap_legend_param = list(
     at = breaks_display,
     labels = breaks_display,
-    title = NULL, #"log fold change", 
-    direction = "horizontal",
-    legend_width = unit(5.5, "cm")
+    title = "Log Fold-Change\n(Relative to S)", 
+    title_position = "leftcenter-rot",
+    legend_height = unit(5, "cm")
   ),
   # # Annotations
   right_annotation = m_annot,
@@ -121,9 +121,9 @@ ht <- Heatmap(
 fname  <- "./figures/genus_level_DA.png"
 # Draw combined heatmap
 png(fname,
-    width = 7,  # width in inches; can adjust
-    height = 6.5, # height in inches; can adjust
+    width = 6.5,  # width in inches; can adjust
+    height = 6, # height in inches; can adjust
     units = "in", res = 300)
-draw(ht, heatmap_legend_side = "top") #, annotation_legend_side = "top") 
-draw(lgd, x = unit(0.7, "npc"), y = unit(0.98, "npc"), just = c("right", "top"))
+draw(ht, heatmap_legend_side = "left") 
+draw(lgd, x = unit(0.93, "npc"), y = unit(0.95, "npc"), just = c("right", "top"))
 dev.off()
